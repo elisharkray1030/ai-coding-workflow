@@ -13,13 +13,13 @@ All skills from [`mattpocock/skills`](https://github.com/mattpocock/skills).
 
 ```mermaid
 graph LR
-    TR[/triage<br/>K2.7 Code] --> IN[/grill-with-docs<br/>K2.7 Code]
-    IN --> SP[/to-spec<br/>Qwen3.7 Max]
-    SP --> TK[/to-tickets<br/>V4 Flash]
+    TR[/triage<br/>K2.7 Code/] --> IN[/grill-with-docs<br/>K2.7 Code/]
+    IN --> SP[/to-spec<br/>Qwen3.7 Max/]
+    SP --> TK[/to-tickets<br/>V4 Flash/]
     TK --> D{Complex?}
-    D -->|Yes| IC[/implement<br/>V4 Pro / K2.6]
-    D -->|No| IS[/implement<br/>V4 Flash]
-    IC --> CR[/code-review<br/>V4 Flash]
+    D -->|Yes| IC[/implement<br/>V4 Pro / K2.6/]
+    D -->|No| IS[/implement<br/>V4 Flash/]
+    IC --> CR[/code-review<br/>V4 Flash/]
     IS --> CR
     CR --> DN[Done]
 
@@ -34,7 +34,7 @@ graph LR
     class TR,IN purple
     class SP green
     class TK,IS blue
-    class IC,PR orange
+    class IC orange
     class CR teal
     class DN green
 ```
@@ -45,11 +45,11 @@ Start with `/triage` to categorize the ask. `/grill-with-docs` interviews you ab
 
 ```mermaid
 graph LR
-    TR[/triage<br/>K2.7 Code] --> IN[/grill-with-docs<br/>K2.7 Code]
+    TR[/triage<br/>K2.7 Code/] --> IN[/grill-with-docs<br/>K2.7 Code/]
     IN --> D{Complex?}
-    D -->|Yes| IC[/implement<br/>V4 Pro]
-    D -->|No| IS[/implement<br/>V4 Flash]
-    IC --> CR[/code-review<br/>V4 Flash]
+    D -->|Yes| IC[/implement<br/>V4 Pro/]
+    D -->|No| IS[/implement<br/>V4 Flash/]
+    IC --> CR[/code-review<br/>V4 Flash/]
     IS --> CR
     CR --> DN[Done]
 
@@ -72,9 +72,9 @@ A lighter pipeline. `/triage` and `/grill-with-docs` research the existing codeb
 
 ```mermaid
 graph LR
-    LO[/diagnosing-bugs<br/>Ph1-2: V4 Flash] --> HY[Hypothesize<br/>Ph3: K2.7 Code]
+    LO[/diagnosing-bugs<br/>Ph1-2: V4 Flash/] --> HY[Hypothesize<br/>Ph3: K2.7 Code]
     HY --> FX[Fix + Regr.<br/>Ph5-6: V4 Pro]
-    FX --> CR[/code-review<br/>V4 Flash]
+    FX --> CR[/code-review<br/>V4 Flash/]
     CR --> DN[Done]
 
     classDef red fill:#ffa8a8
@@ -95,10 +95,10 @@ graph LR
 
 ```mermaid
 graph LR
-    AS[/improve-codebase-architecture<br/>Qwen3.7 Max] --> SP[/to-spec<br/>Qwen3.7 Max]
-    SP --> TK[/to-tickets<br/>V4 Flash]
-    TK --> IM[/implement<br/>V4 Pro]
-    IM --> CR[/code-review<br/>V4 Flash]
+    AS[/improve-codebase-architecture<br/>Qwen3.7 Max/] --> SP[/to-spec<br/>Qwen3.7 Max/]
+    SP --> TK[/to-tickets<br/>V4 Flash/]
+    TK --> IM[/implement<br/>V4 Pro/]
+    IM --> CR[/code-review<br/>V4 Flash/]
     CR --> DN[Done]
 
     classDef yellow fill:#ffd43b
@@ -121,7 +121,7 @@ graph LR
 
 ```mermaid
 graph LR
-    PR[/prototype<br/>V4 Flash / MiMo V2.5] --> IT[Iterate<br/>V4 Flash / MiMo V2.5]
+    PR[/prototype<br/>V4 Flash / MiMo V2.5/] --> IT[Iterate<br/>V4 Flash / MiMo V2.5]
     IT -.->|loop| PR
 
     classDef orange fill:#ffc078
