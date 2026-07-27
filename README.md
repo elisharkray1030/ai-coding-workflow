@@ -7,19 +7,40 @@ All skills from [`mattpocock/skills`](https://github.com/mattpocock/skills).
 
 ---
 
+## Routing Philosophy
+
+**V4 Flash is the default for everything.** It scores 79% SWE-bench Verified, has 1M context, costs $0.14/$0.28 per million tokens, and has 31,650 req/5h — effectively unlimited. Start here for every stage of every pipeline.
+
+**Escalate only when Flash proves insufficient.** Don't pre-assign expensive models to stages based on what the stage *could* need. Wait for a concrete failure, then retry with a stronger model.
+
+| Escalation path | When | Escalate to |
+|----------------|------|-------------|
+| /triage gives wrong category | Rare — Flash handles this fine | K2.7 Code |
+| /grill produces shallow CONTEXT.md | Feature-add to a complex codebase | K2.7 Code |
+| /to-spec misses architectural nuance | Complex greenfield with tricky domain | V4 Pro |
+| /implement produces wrong architecture | Multi-file, cross-cutting change | V4 Pro |
+| /implement keeps breaking constraints | Large-scale redesign | V4 Pro |
+| Bug hypotheses keep being wrong | 3+ false hypotheses in a row | K2.7 Code |
+| Bug fix keeps failing tests | Correctness-critical fix | V4 Pro |
+| Architecture scan or wayfinding | Always needs deep reasoning | Qwen3.7 Max |
+
+The savings are dramatic: ~$0.04 for a simple feature vs ~$0.42 with the old model-per-stage routing. You stay safely within the $60/month budget even on heavy months.
+
+---
+
 ## Pipeline Diagrams
 
 ### 1. NEW PROJECT (from scratch)
 
 ```mermaid
 graph LR
-    TR[ /triage<br/>K2.7 Code] --> IN[ /grill-with-docs<br/>K2.7 Code]
-    IN --> SP[ /to-spec<br/>Qwen3.7 Max]
-    SP --> TK[ /to-tickets<br/>V4 Flash]
+    TR[ /triage] --> IN[ /grill-with-docs]
+    IN --> SP[ /to-spec]
+    SP --> TK[ /to-tickets]
     TK --> D{Complex?}
-    D -->|Yes| IC[ /implement<br/>V4 Pro / K2.6]
-    D -->|No| IS[ /implement<br/>V4 Flash]
-    IC --> CR[ /code-review<br/>V4 Flash]
+    D -->|Yes| IC[ /implement]
+    D -->|No| IS[ /implement]
+    IC --> CR[ /code-review]
     IS --> CR
     CR --> DN[Done]
 
@@ -39,17 +60,17 @@ graph LR
     class DN green
 ```
 
-Start with `/triage` to categorize the ask. `/grill-with-docs` interviews you about the domain, builds CONTEXT.md. `/to-spec` formalizes what was discussed. `/to-tickets` breaks it into vertical-slice tickets with blocking edges. `/implement` writes the code -- V4 Flash for simple, V4 Pro or K2.6 for complex. `/code-review` checks standards and spec compliance.
+Start with `/triage` to categorize the ask. `/grill-with-docs` interviews you about the domain, builds CONTEXT.md. `/to-spec` formalizes what was discussed. `/to-tickets` breaks it into vertical-slice tickets with blocking edges. `/implement` writes the code — V4 Flash by default, V4 Pro if the implementation fails quality gates. `/code-review` checks standards and spec compliance.
 
 ### 2. ADDING A FEATURE
 
 ```mermaid
 graph LR
-    TR[ /triage<br/>K2.7 Code] --> IN[ /grill-with-docs<br/>K2.7 Code]
+    TR[ /triage] --> IN[ /grill-with-docs]
     IN --> D{Complex?}
-    D -->|Yes| IC[ /implement<br/>V4 Pro]
-    D -->|No| IS[ /implement<br/>V4 Flash]
-    IC --> CR[ /code-review<br/>V4 Flash]
+    D -->|Yes| IC[ /implement]
+    D -->|No| IS[ /implement]
+    IC --> CR[ /code-review]
     IS --> CR
     CR --> DN[Done]
 
@@ -66,15 +87,15 @@ graph LR
     class DN green
 ```
 
-A lighter pipeline. `/triage` and `/grill-with-docs` research the existing codebase to understand context. Skip spec and tickets -- you're extending what's there, not starting fresh. `/implement` writes the feature, then `/code-review` checks it.
+A lighter pipeline. `/triage` and `/grill-with-docs` research the existing codebase to understand context. Skip spec and tickets — you're extending what's there, not starting fresh. `/implement` writes the feature on V4 Flash, then `/code-review` checks it. For cross-cutting changes touching 3+ modules, rerun `/implement` on V4 Pro.
 
 ### 3. BUG FIX
 
 ```mermaid
 graph LR
-    LO[ /diagnosing-bugs<br/>Ph1-2: V4 Flash] --> HY[Hypothesize<br/>Ph3: K2.7 Code]
-    HY --> FX[Fix + Regr.<br/>Ph5-6: V4 Pro]
-    FX --> CR[ /code-review<br/>V4 Flash]
+    LO[ /diagnosing-bugs] --> HY[Hypothesize]
+    HY --> FX[Fix + Regr.]
+    FX --> CR[ /code-review]
     CR --> DN[Done]
 
     classDef red fill:#ff8787,color:#000
@@ -89,16 +110,16 @@ graph LR
     class DN green
 ```
 
-`/diagnosing-bugs` runs the 6-phase loop. Phase 1 builds a tight repro (V4 Flash, iterate cheap). Phase 2 minimizes it. Phase 3 generates ranked hypotheses (K2.7 Code for reasoning). Phase 4 instruments. Phase 5 writes the fix and regression test (V4 Pro for correctness). Phase 6 cleans up debug tags and commits. Review with `/code-review`.
+`/diagnosing-bugs` runs the 6-phase loop. Phase 1 builds a tight repro (V4 Flash, iterate cheap). Phase 2 minimizes it. Phase 3 generates ranked hypotheses — escalate to K2.7 Code if Flash generates 3+ false hypotheses. Phase 4 instruments. Phase 5 writes the fix and regression test — escalate to V4 Pro if the fix keeps failing tests. Phase 6 cleans up debug tags and commits. Review with `/code-review`.
 
 ### 4. ARCHITECTURE REDESIGN
 
 ```mermaid
 graph LR
-    AS[ /arch-scan<br/>Qwen3.7 Max] --> SP[ /to-spec<br/>Qwen3.7 Max]
-    SP --> TK[ /to-tickets<br/>V4 Flash]
-    TK --> IM[ /implement<br/>V4 Pro]
-    IM --> CR[ /code-review<br/>V4 Flash]
+    AS[ /arch-scan] --> SP[ /to-spec]
+    SP --> TK[ /to-tickets]
+    TK --> IM[ /implement]
+    IM --> CR[ /code-review]
     CR --> DN[Done]
 
     classDef yellow fill:#fcc419,color:#000
@@ -115,13 +136,13 @@ graph LR
     class DN green
 ```
 
-`/improve-codebase-architecture` scans the codebase for deepening opportunities and generates an HTML report (Qwen3.7 Max for deep reasoning). `/to-spec` formalizes the plan, `/to-tickets` slices into work items. `/implement` with V4 Pro handles large-scale changes (needs 1M context). `/code-review` to confirm.
+`/improve-codebase-architecture` scans the codebase for deepening opportunities and generates an HTML report — Qwen3.7 Max is always used here because deep reasoning is non-negotiable. `/to-spec` formalizes the plan (V4 Pro — synthesizes scan output, no deep reasoning needed). `/to-tickets` slices into work items. `/implement` with V4 Pro handles large-scale changes (needs 1M context). `/code-review` to confirm.
 
 ### 5. PROTOTYPE / SPIKE
 
 ```mermaid
 graph LR
-    PR[ /prototype<br/>V4 Flash / MiMo V2.5] --> IT[Iterate<br/>V4 Flash / MiMo V2.5]
+    PR[ /prototype] --> IT[Iterate]
     IT -.->|loop| PR
 
     classDef orange fill:#ffa94d,color:#000
@@ -131,7 +152,33 @@ graph LR
     class IT purple
 ```
 
-`/prototype` generates throwaway code to answer a design question. Pick a branch -- logic prototype (state machine test) or UI prototype (multiple visual variants). Iterate with the same cheap model (V4 Flash or MiMo V2.5) until you have your answer. No spec, no review -- this is learning, not shipping.
+`/prototype` generates throwaway code to answer a design question. V4 Flash or MiMo V2.5 only — speed over quality. Iterate with the same cheap model until you have your answer. No spec, no review — this is learning, not shipping.
+
+### 6. WAYFINDER (complex project, multiple sessions)
+
+```mermaid
+graph LR
+    CM[ /wayfinder] --> RS[ /research]
+    RS --> PR[ /prototype]
+    PR --> GR[ /grill-with-docs]
+    GR --> TK[Task Tickets]
+    TK --> DN[Done]
+
+    classDef yellow fill:#fcc419,color:#000
+    classDef blue fill:#4dabf7,color:#000
+    classDef orange fill:#ffa94d,color:#000
+    classDef purple fill:#9775fa,color:#000
+    classDef teal fill:#63e6be,color:#000
+    classDef green fill:#69db7c,color:#000
+
+    class CM yellow
+    class RS,PR blue
+    class GR purple
+    class TK teal
+    class DN green
+```
+
+For projects too big for one agent session. Creates a **map** of decision tickets on the issue tracker. `/wayfinder` charts the initial map with Qwen3.7 Max — charting unknown territory needs max reasoning. Everything after is V4 Flash sub-agents: research tickets, prototype tickets, grilling tickets, task tickets.
 
 ---
 
@@ -145,25 +192,25 @@ Pricing via OpenCode Go. "Req/5h" = estimated requests per 5-hour rolling window
 | **DeepSeek V4 Pro** | $0.435 | $0.87 | 3,450 | 17,150 | 1M | LiveCodeBench 93.5%, Codeforces 3206. Strongest for implementation. |
 | **Kimi K2.6** | $0.95 | $4.00 | 1,150 | 5,750 | 262K | Agent Swarm (300 sub-agents). Best for agentic multi-file changes. |
 | **Kimi K2.7 Code** | $0.95 | $4.00 | 1,350 | 6,750 | 256K | Coding-focused model. More requests than K2.6. Solid mid-tier planner. |
-| **DeepSeek V4 Flash** | $0.14 | $0.28 | **31,650** | 158,150 | 1M | Default workhorse. 79% SWE-bench Verified. Cheap. Fast. |
+| **DeepSeek V4 Flash** | $0.14 | $0.28 | **31,650** | 158,150 | 1M | **Default workhorse.** 79% SWE-bench Verified. Cheap. Fast. |
 | **MiMo V2.5** | $0.14 | $0.28 | 30,100 | 150,400 | 1M | Budget workhorse. Same price as Flash, 1M context. |
 | **MiniMax M2.7** | $0.30 | $1.20 | 3,400 | 17,000 | 205K | Strong cost-per-benchmark-point (78% SWE-bench Verified at $0.30). |
 
 ---
 
-## Pipeline: Use Cases & Stage-Specific Routing
+## Pipeline: Use Case & Routing
 
 ### 1. NEW PROJECT (from scratch)
 
 ```mermaid
 graph LR
-    TR[ /triage<br/>K2.7 Code] --> IN[ /grill-with-docs<br/>K2.7 Code]
-    IN --> SP[ /to-spec<br/>Qwen3.7 Max]
-    SP --> TK[ /to-tickets<br/>V4 Flash]
+    TR[ /triage] --> IN[ /grill-with-docs]
+    IN --> SP[ /to-spec]
+    SP --> TK[ /to-tickets]
     TK --> D{Complex?}
-    D -->|Yes| IC[ /implement<br/>V4 Pro / K2.6]
-    D -->|No| IS[ /implement<br/>V4 Flash]
-    IC --> CR[ /code-review<br/>V4 Flash]
+    D -->|Yes| IC[ /implement]
+    D -->|No| IS[ /implement]
+    IC --> CR[ /code-review]
     IS --> CR
     CR --> DN[Done]
 
@@ -183,18 +230,17 @@ graph LR
     class DN green
 ```
 
+| Stage | Default | Escalation | Why |
+|-------|---------|------------|-----|
+| **Triage** | V4 Flash | — | Greenfield has no codebase to read. Simple categorization. |
+| **Interview** | V4 Flash | — | Domain conversation, no codebase research. Flash handles this fine. |
+| **Spec** | V4 Flash | V4 Pro if spec misses architectural nuance | Synthesis of existing conversation. Pure formatting. |
+| **Tickets** | V4 Flash | — | Mechanical breakdown. |
+| **Implement (simple)** | V4 Flash | — | Single file, straightforward logic. |
+| **Implement (complex)** | V4 Flash first | V4 Pro if implementation fails quality gates | Try cheap first. Escalate only when Flash proves insufficient. |
+| **Code Review** | V4 Flash | — | Read diffs, check standards. Flash handles this fine. |
 
-| Stage | Command | Agent | **Model** | Why | Est. req | Est. cost |
-|---|---|---|---|---|---|---|
-| **Triage** | `/triage` | Plan | **K2.7 Code** | Categorizing, reading issues. Needs instruction-following, not max reasoning. | 1-2 | ~$0.06 |
-| **Interview** | `/grill-with-docs` | Plan | **K2.7 Code** | Research-heavy: read docs, ask questions, explore codebase, build CONTEXT.md. No code written. | 3-8 | ~$0.25 |
-| **Spec** | `/to-spec` | Plan | **Qwen3.7 Max** | Pulls everything from the interview into a formal spec. You want the best reasoning here — 60.6% SWE-bench Pro. | 1-2 | ~$0.08 |
-| **Tickets** | `/to-tickets` | Plan | **V4 Flash** | Break into vertical slices with blocking edges. Mostly mechanical. | 3-5 | ~$0.01 |
-| **Implement** (simple) | `/implement` | **Build** | **V4 Flash** | Single file, straightforward logic. Flash hits 79% SWE-bench Verified. | 5-10 | ~$0.01 |
-| **Implement** (complex) | `/implement` | **Build** | **V4 Pro** or **K2.6** | Multi-file, 1M context, complex logic. V4 Pro: LiveCodeBench 93.5%. K2.6: Agent Swarm. | 5-15 | ~$0.26 |
-| **Code Review** | `/code-review` | Plan | **V4 Flash** | Read diffs, check standards and spec. No need to burn an expensive model here. | 2-4 | ~$0.01 |
-
-**Total per feature:** ≈20-40 requests, **≈$0.70** of your $60 monthly budget.
+**Est. cost:** simple ~**$0.04** | complex ~**$0.13**
 
 ---
 
@@ -202,11 +248,11 @@ graph LR
 
 ```mermaid
 graph LR
-    TR[ /triage<br/>K2.7 Code] --> IN[ /grill-with-docs<br/>K2.7 Code]
+    TR[ /triage] --> IN[ /grill-with-docs]
     IN --> D{Complex?}
-    D -->|Yes| IC[ /implement<br/>V4 Pro]
-    D -->|No| IS[ /implement<br/>V4 Flash]
-    IC --> CR[ /code-review<br/>V4 Flash]
+    D -->|Yes| IC[ /implement]
+    D -->|No| IS[ /implement]
+    IC --> CR[ /code-review]
     IS --> CR
     CR --> DN[Done]
 
@@ -223,14 +269,15 @@ graph LR
     class DN green
 ```
 
+| Stage | Default | Escalation | Why |
+|-------|---------|------------|-----|
+| **Triage** | V4 Flash | K2.7 Code if triage consistently misclassifies | Codebase reading — Flash can do it, but K2.7's coding focus may help for tricky domains. |
+| **Interview** | V4 Flash | K2.7 Code if grill produces shallow CONTEXT.md | Codebase exploration. Start Flash, escalate if shallow. |
+| **Implement (simple)** | V4 Flash | — | Small change in existing patterns. |
+| **Implement (cross-cutting)** | V4 Flash first | V4 Pro if touches 3+ modules | Complex needs the 1M context and deeper reasoning. |
+| **Code Review** | V4 Flash | — | Review pass. Flash handles this fine. |
 
-| Stage | Command | Agent | Model | Why |
-|---|---|---|---|---|
-| **Triage** | `/triage` | Plan | **K2.7 Code** | Quick categorization. |
-| **Interview** | `/grill-with-docs` | Plan | **K2.7 Code** | Research existing codebase and what needs to change. |
-| **Implement** (simple) | `/implement` | **Build** | **V4 Flash** | Single file, straightforward feature. |
-| **Implement** (complex) | `/implement` | **Build** | **V4 Pro** | Multi-file, complex logic. Escalate if Flash struggles. |
-| **Code Review** | `/code-review` | Plan | **V4 Flash** | Review pass. Flash handles this fine. |
+**Est. cost:** simple ~**$0.03** | cross-cutting ~**$0.08**
 
 ---
 
@@ -238,9 +285,9 @@ graph LR
 
 ```mermaid
 graph LR
-    LO[ /diagnosing-bugs<br/>Ph1-2: V4 Flash] --> HY[Hypothesize<br/>Ph3: K2.7 Code]
-    HY --> FX[Fix + Regr.<br/>Ph5-6: V4 Pro]
-    FX --> CR[ /code-review<br/>V4 Flash]
+    LO[ /diagnosing-bugs] --> HY[Hypothesize]
+    HY --> FX[Fix + Regr.]
+    FX --> CR[ /code-review]
     CR --> DN[Done]
 
     classDef red fill:#ff8787,color:#000
@@ -255,17 +302,18 @@ graph LR
     class DN green
 ```
 
+Matt Pocock's `/diagnosing-bugs` is a 6-phase discipline. **Phase 1 is where the real work happens** — build a tight red/green feedback loop before you do anything else.
 
-Matt Pocock's `/diagnosing-bugs` is a 6-phase discipline. **Phase 1 is where the real work happens** -- build a tight red/green feedback loop before you do anything else.
+| Phase | Steps | Default | Escalation | Why |
+|-------|-------|---------|------------|-----|
+| **Ph 1: Feedback loop** | Build harness, test, curl, script, etc. | **V4 Flash** | — | Mechanical work — write code to catch the bug. You'll iterate a lot, so keep it cheap. |
+| **Ph 2: Reproduce+minimise** | Run the loop, shrink to minimal repro. | **V4 Flash** | — | Lots of iterations. Flash is fast and cheap. |
+| **Ph 3: Hypothesise** | Generate 3-5 ranked falsifiable hypotheses. | **V4 Flash** | **K2.7 Code** if 3+ false hypotheses in a row | Needs reasoning about causality. Start Flash, escalate if stuck. |
+| **Ph 4: Instrument** | Change one variable at a time. Tag every debug log. | **V4 Flash** | — | High volume of small probes. |
+| **Ph 5: Fix + regr. test** | Write regression test before fix. Watch fail→fix→pass. | **V4 Flash** | **V4 Pro** if fix keeps failing tests | Correctness-critical. V4 Pro for when Flash can't solve it. |
+| **Ph 6: Cleanup** | Remove debug tags, commit, post-mortem. | **V4 Flash** | — | Mechanical cleanup. |
 
-| Phase | Steps | Agent | Model | Why |
-|---|---|---|---|---|
-| **Ph 1: Feedback loop** | Build harness, test, curl, script, etc. | **Build** | **V4 Flash** | Mechanical work -- write code to catch the bug. You'll iterate a lot, so cost adds up. |
-| **Ph 2: Reproduce+minimise** | Run the loop, shrink to minimal repro. | **Build** | **V4 Flash** | Lots of iterations. Flash is fast and cheap. |
-| **Ph 3: Hypothesise** | Generate 3-5 ranked falsifiable hypotheses. | Plan | **K2.7 Code** (or K2.6 for hard bugs) | Needs reasoning about causality. Show the ranked list to the user before testing. |
-| **Ph 4: Instrument** | Change one variable at a time. Tag every debug log. | Plan | **V4 Flash** | Running probes, testing predictions. High volume. |
-| **Ph 5: Fix + regr. test** | Write regression test before fix. Watch fail→fix→pass. | **Build** | **V4 Pro** | The actual fix. Use Pro for correctness. |
-| **Ph 6: Cleanup** | Remove debug tags, commit, post-mortem. | **Build** | **V4 Flash** | Mechanical cleanup. |
+**Est. cost:** easy ~**$0.05** | hard ~**$0.18**
 
 ---
 
@@ -273,10 +321,10 @@ Matt Pocock's `/diagnosing-bugs` is a 6-phase discipline. **Phase 1 is where the
 
 ```mermaid
 graph LR
-    AS[ /arch-scan<br/>Qwen3.7 Max] --> SP[ /to-spec<br/>Qwen3.7 Max]
-    SP --> TK[ /to-tickets<br/>V4 Flash]
-    TK --> IM[ /implement<br/>V4 Pro]
-    IM --> CR[ /code-review<br/>V4 Flash]
+    AS[ /arch-scan] --> SP[ /to-spec]
+    SP --> TK[ /to-tickets]
+    TK --> IM[ /implement]
+    IM --> CR[ /code-review]
     CR --> DN[Done]
 
     classDef yellow fill:#fcc419,color:#000
@@ -293,14 +341,15 @@ graph LR
     class DN green
 ```
 
+| Stage | Model | Why |
+|-------|-------|-----|
+| **Architecture scan** | **Qwen3.7 Max** (always) | Produces an HTML report of deepening opportunities. Needs the best reasoning (60.6% SWE-bench Pro, 69.7% Terminal-Bench). Non-negotiable. |
+| **Spec** | **V4 Pro** | Synthesis of scan output, not new reasoning. Qwen is overkill here. |
+| **Tickets** | **V4 Flash** | Breaking into tickets is mechanical. |
+| **Implement** | **V4 Pro** | Large-scale changes need 1M context. |
+| **Code Review** | **V4 Flash** | Review pass. |
 
-| Stage | Command | Agent | Model | Why |
-|---|---|---|---|---|
-| **Architecture scan** | `/improve-codebase-architecture` | Plan | **Qwen3.7 Max** | Produces an HTML report of deepening opportunities. Needs the best reasoning (60.6% SWE-bench Pro, 69.7% Terminal-Bench). |
-| **Spec** | `/to-spec` | Plan | **Qwen3.7 Max** | Same session, same reasoning requirements. |
-| **Tickets** | `/to-tickets` | Plan | **V4 Flash** | Breaking into tickets is mechanical. |
-| **Implement** | `/implement` | **Build** | **V4 Pro** | Large-scale changes need 1M context. |
-| **Code Review** | `/code-review` | Plan | **V4 Flash** | Review pass. Flash handles this fine. |
+**Est. cost:** ~**$0.25**
 
 ---
 
@@ -308,7 +357,7 @@ graph LR
 
 ```mermaid
 graph LR
-    PR[ /prototype<br/>V4 Flash / MiMo V2.5] --> IT[Iterate<br/>V4 Flash / MiMo V2.5]
+    PR[ /prototype] --> IT[Iterate]
     IT -.->|loop| PR
 
     classDef orange fill:#ffa94d,color:#000
@@ -318,13 +367,14 @@ graph LR
     class IT purple
 ```
 
-
 Throwaway code that answers a question. Speed over quality. Don't burn expensive models here.
 
-| Stage | Command | Agent | Model | Why |
-|---|---|---|---|---|
-| **Prototype** | `/prototype` | **Build** | **V4 Flash** or **MiMo V2.5** | ~30,000 req/5h = unlimited. MiMo gives 1M context at same price. |
-| **Iterate** | manual | **Build** | Same | |
+| Stage | Model | Why |
+|-------|-------|-----|
+| **Prototype** | **V4 Flash** or **MiMo V2.5** | ~30,000 req/5h = unlimited. MiMo gives 1M context at same price. |
+| **Iterate** | Same | |
+
+**Est. cost:** ~**$0.01**
 
 ---
 
@@ -332,10 +382,10 @@ Throwaway code that answers a question. Speed over quality. Don't burn expensive
 
 ```mermaid
 graph LR
-    CM[ /wayfinder<br/>Qwen3.7 Max] --> RS[ /research<br/>V4 Flash]
-    RS --> PR[ /prototype<br/>V4 Flash]
-    PR --> GR[ /grill-with-docs<br/>K2.7 Code]
-    GR --> TK[Task Tickets<br/>V4 Flash]
+    CM[ /wayfinder] --> RS[ /research]
+    RS --> PR[ /prototype]
+    PR --> GR[ /grill-with-docs]
+    GR --> TK[Task Tickets]
     TK --> DN[Done]
 
     classDef yellow fill:#fcc419,color:#000
@@ -354,13 +404,15 @@ graph LR
 
 For projects too big for one agent session. Creates a **map** of decision tickets on the issue tracker.
 
-| Stage | Command | Agent | Model | Why |
-|---|---|---|---|---|
-| **Chart the map** | `/wayfinder` | Plan | **Qwen3.7 Max** | Name the destination, surface fog, create the initial tickets. Needs max reasoning. |
-| **Research tickets** | (auto subagent) | Subagent | **V4 Flash** | Read docs, investigate APIs. High volume, cheap. |
-| **Prototype tickets** | `/prototype` | **Build** | **V4 Flash** | Throwaway code to answer design questions. |
-| **Grilling tickets** | `/grill-with-docs` | Plan | **K2.7 Code** | Conversation to sharpen decisions one at a time. |
-| **Task tickets** | manual | **Build** | **V4 Flash** | Mechanical setup work. |
+| Stage | Model | Why |
+|-------|-------|-----|
+| **Chart the map** | **Qwen3.7 Max** (always) | Name the destination, surface fog, create the initial tickets. Needs max reasoning. Non-negotiable. |
+| **Research tickets** | **V4 Flash** | Read docs, investigate APIs. High volume, cheap. |
+| **Prototype tickets** | **V4 Flash** | Throwaway code to answer design questions. |
+| **Grilling tickets** | **V4 Flash** | Conversation to sharpen decisions one at a time. |
+| **Task tickets** | **V4 Flash** | Mechanical setup work. |
+
+**Est. cost:** ~**$0.15-0.30**
 
 ---
 
@@ -441,31 +493,37 @@ When documenting a feature or spec, add Mermaid diagrams alongside the text. The
 
 ## Model Route Quick Reference
 
-| Task Type | Primary Model | Fallback | Agent | Est. req |
-|---|---|---|---|---|
-| Triage | K2.7 Code | V4 Flash | Plan | 1-2 |
-| Codebase research | K2.7 Code | V4 Flash | Plan | 3-8 |
-| Planning / spec / arch | Qwen3.7 Max | K2.6 | Plan | 1-3 |
-| Tickets | V4 Flash | K2.7 Code | Plan | 3-5 |
-| Implementation (simple) | V4 Flash | V4 Pro | Build | 3-8 |
-| Implementation (complex) | V4 Pro or K2.6 | Qwen3.7 Max | Build | 5-15 |
-| Debugging (loop) | V4 Flash | — | Build | 10-50 |
-| Debugging (hypothesis) | K2.7 Code | K2.6 | Plan | 3-5 |
-| Prototype | V4 Flash | MiMo V2.5 | Build | 5-20 |
-| Code review | V4 Flash | — | Plan | 2-4 |
+| Task Type | Default | Escalation | Est. req |
+|-----------|---------|------------|----------|
+| Triage | V4 Flash | K2.7 Code | 1-2 |
+| Codebase research / grill | V4 Flash | K2.7 Code if shallow | 3-8 |
+| Planning / spec (new project) | V4 Flash | V4 Pro | 1-3 |
+| Tickets | V4 Flash | — | 3-5 |
+| Implementation (simple) | V4 Flash | — | 3-8 |
+| Implementation (complex) | V4 Flash first | V4 Pro if fails quality gates | 5-15 |
+| Debugging (loop) | V4 Flash | — | 10-50 |
+| Debugging (hypothesis) | V4 Flash | K2.7 Code if stuck | 3-5 |
+| Debugging (fix) | V4 Flash | V4 Pro if fix fails tests | 2-5 |
+| Architecture scan | Qwen3.7 Max | — | 1-3 |
+| Prototype | V4 Flash / MiMo | — | 5-20 |
+| Code review | V4 Flash | — | 2-4 |
+| Wayfinder (map) | Qwen3.7 Max | — | 1-3 |
 
 ---
 
 ## Budget Tracking
 
-$60/month. A typical feature cycle costs ~$0.50-1.50.
-That's **40-120 features per month** if you route correctly.
+$60/month. A typical feature cycle costs ~**$0.04-0.25** with the default-first routing.
+That's **240-1,500 features per month** if you route correctly.
 
 | Routing strategy | Features/month (max) |
 |---|---|
+| **Flash-first (this guide)** | **~240-1,500** |
 | Flash for everything | ~200+ |
-| **Balanced (this guide)** | **~60-120** |
+| Balanced (per-stage model pinning) | ~60-120 |
 | Qwen3.7 Max for everything | ~5-10 (don't) |
+
+The buffer is now large enough ($40-50/month) that even heavy months with multiple architecture scans, wayfinders, and bug fixes won't break the budget.
 
 ---
 
