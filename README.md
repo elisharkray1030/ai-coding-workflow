@@ -13,13 +13,13 @@ All skills from [`mattpocock/skills`](https://github.com/mattpocock/skills).
 
 ```mermaid
 graph LR
-    TR[Triage<br/>K2.7 Code] --> IN[Interview<br/>K2.7 Code]
-    IN --> SP[Spec<br/>Qwen3.7 Max]
-    SP --> TK[Tickets<br/>V4 Flash]
+    TR[/triage<br/>K2.7 Code] --> IN[/grill-with-docs<br/>K2.7 Code]
+    IN --> SP[/to-spec<br/>Qwen3.7 Max]
+    SP --> TK[/to-tickets<br/>V4 Flash]
     TK --> D{Complex?}
-    D -->|Yes| IC[Implement<br/>V4 Pro / K2.6]
-    D -->|No| IS[Implement<br/>V4 Flash]
-    IC --> CR[Code Review<br/>V4 Flash]
+    D -->|Yes| IC[/implement<br/>V4 Pro / K2.6]
+    D -->|No| IS[/implement<br/>V4 Flash]
+    IC --> CR[/code-review<br/>V4 Flash]
     IS --> CR
     CR --> DN[Done]
 
@@ -33,15 +33,17 @@ graph LR
     style DN fill:#8ce99a,color:#1e1e1e
 ```
 
+Start with `/triage` to categorize the ask. `/grill-with-docs` interviews you about the domain, builds CONTEXT.md. `/to-spec` formalizes what was discussed. `/to-tickets` breaks it into vertical-slice tickets with blocking edges. `/implement` writes the code -- V4 Flash for simple, V4 Pro or K2.6 for complex. `/code-review` checks standards and spec compliance.
+
 ### 2. ADDING A FEATURE
 
 ```mermaid
 graph LR
-    TR[Triage<br/>K2.7 Code] --> IN[Interview<br/>K2.7 Code]
+    TR[/triage<br/>K2.7 Code] --> IN[/grill-with-docs<br/>K2.7 Code]
     IN --> D{Complex?}
-    D -->|Yes| IC[Implement<br/>V4 Pro]
-    D -->|No| IS[Implement<br/>V4 Flash]
-    IC --> CR[Code Review<br/>V4 Flash]
+    D -->|Yes| IC[/implement<br/>V4 Pro]
+    D -->|No| IS[/implement<br/>V4 Flash]
+    IC --> CR[/code-review<br/>V4 Flash]
     IS --> CR
     CR --> DN[Done]
 
@@ -53,13 +55,15 @@ graph LR
     style DN fill:#8ce99a,color:#1e1e1e
 ```
 
+A lighter pipeline. `/triage` and `/grill-with-docs` research the existing codebase to understand context. Skip spec and tickets -- you're extending what's there, not starting fresh. `/implement` writes the feature, then `/code-review` checks it.
+
 ### 3. BUG FIX
 
 ```mermaid
 graph LR
-    LO[Build Loop<br/>Ph1-2: V4 Flash] --> HY[Hypothesize<br/>Ph3: K2.7 Code]
+    LO[/diagnosing-bugs<br/>Ph1-2: V4 Flash] --> HY[Hypothesize<br/>Ph3: K2.7 Code]
     HY --> FX[Fix + Regr.<br/>Ph5-6: V4 Pro]
-    FX --> CR[Code Review<br/>V4 Flash]
+    FX --> CR[/code-review<br/>V4 Flash]
     CR --> DN[Done]
 
     style LO fill:#ffa8a8,color:#1e1e1e
@@ -69,14 +73,16 @@ graph LR
     style DN fill:#8ce99a,color:#1e1e1e
 ```
 
+`/diagnosing-bugs` runs the 6-phase loop. Phase 1 builds a tight repro (V4 Flash, iterate cheap). Phase 2 minimizes it. Phase 3 generates ranked hypotheses (K2.7 Code for reasoning). Phase 4 instruments. Phase 5 writes the fix and regression test (V4 Pro for correctness). Phase 6 cleans up debug tags and commits. Review with `/code-review`.
+
 ### 4. ARCHITECTURE REDESIGN
 
 ```mermaid
 graph LR
-    AS[Arch Scan<br/>Qwen3.7 Max] --> SP[Spec<br/>Qwen3.7 Max]
-    SP --> TK[Tickets<br/>V4 Flash]
-    TK --> IM[Implement<br/>V4 Pro]
-    IM --> CR[Code Review<br/>V4 Flash]
+    AS[/improve-codebase-architecture<br/>Qwen3.7 Max] --> SP[/to-spec<br/>Qwen3.7 Max]
+    SP --> TK[/to-tickets<br/>V4 Flash]
+    TK --> IM[/implement<br/>V4 Pro]
+    IM --> CR[/code-review<br/>V4 Flash]
     CR --> DN[Done]
 
     style AS fill:#ffd43b,color:#1e1e1e
@@ -87,16 +93,20 @@ graph LR
     style DN fill:#8ce99a,color:#1e1e1e
 ```
 
+`/improve-codebase-architecture` scans the codebase for deepening opportunities and generates an HTML report (Qwen3.7 Max for deep reasoning). `/to-spec` formalizes the plan, `/to-tickets` slices into work items. `/implement` with V4 Pro handles large-scale changes (needs 1M context). `/code-review` to confirm.
+
 ### 5. PROTOTYPE / SPIKE
 
 ```mermaid
 graph LR
-    PR[Prototype<br/>V4 Flash / MiMo V2.5] --> IT[Iterate<br/>V4 Flash / MiMo V2.5]
+    PR[/prototype<br/>V4 Flash / MiMo V2.5] --> IT[Iterate<br/>V4 Flash / MiMo V2.5]
     IT -.->|loop| PR
 
     style PR fill:#ffc078,color:#1e1e1e
     style IT fill:#b197fc,color:#1e1e1e
 ```
+
+`/prototype` generates throwaway code to answer a design question. Pick a branch -- logic prototype (state machine test) or UI prototype (multiple visual variants). Iterate with the same cheap model (V4 Flash or MiMo V2.5) until you have your answer. No spec, no review -- this is learning, not shipping.
 
 ---
 
