@@ -38,8 +38,8 @@ graph LR
     IN --> SP[ /to-spec]
     SP --> TK[ /to-tickets]
     TK --> D{Complex?}
-    D -->|Complex| IC[ /implement]
-    D -->|Simple| IS[ /implement]
+    D -->|Complex| IC[ /implement · V4 Pro]
+    D -->|Simple| IS[ /implement · V4 Flash]
     IC --> CR[ /code-review]
     IS --> CR
     CR --> DN[Done]
@@ -222,8 +222,8 @@ graph LR
     IN --> SP[ /to-spec]
     SP --> TK[ /to-tickets]
     TK --> D{Complex?}
-    D -->|Complex| IC[ /implement]
-    D -->|Simple| IS[ /implement]
+    D -->|Complex| IC[ /implement · V4 Pro]
+    D -->|Simple| IS[ /implement · V4 Flash]
     IC --> CR[ /code-review]
     IS --> CR
     CR --> DN[Done]
