@@ -95,7 +95,7 @@ graph LR
 
 ```mermaid
 graph LR
-    AS[ /improve-codebase-architecture<br/>Qwen3.7 Max] --> SP[ /to-spec<br/>Qwen3.7 Max]
+    AS[ /arch-scan<br/>Qwen3.7 Max] --> SP[ /to-spec<br/>Qwen3.7 Max]
     SP --> TK[ /to-tickets<br/>V4 Flash]
     TK --> IM[ /implement<br/>V4 Pro]
     IM --> CR[ /code-review<br/>V4 Flash]
