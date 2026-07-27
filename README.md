@@ -23,13 +23,13 @@ graph LR
     IS --> CR
     CR --> DN[Done]
 
-    classDef purple fill:#b197fc
-    classDef green fill:#8ce99a
-    classDef blue fill:#74c0fc
-    classDef orange fill:#ffc078
-    classDef teal fill:#96f2d7
-    classDef yellow fill:#ffd43b
-    classDef red fill:#ffa8a8
+    classDef purple fill:#9775fa
+    classDef green fill:#69db7c
+    classDef blue fill:#4dabf7
+    classDef orange fill:#ffa94d
+    classDef teal fill:#63e6be
+    classDef yellow fill:#fcc419
+    classDef red fill:#ff8787
 
     class TR,IN purple
     class SP green
@@ -53,11 +53,11 @@ graph LR
     IS --> CR
     CR --> DN[Done]
 
-    classDef purple fill:#b197fc
-    classDef green fill:#8ce99a
-    classDef blue fill:#74c0fc
-    classDef orange fill:#ffc078
-    classDef teal fill:#96f2d7
+    classDef purple fill:#9775fa
+    classDef green fill:#69db7c
+    classDef blue fill:#4dabf7
+    classDef orange fill:#ffa94d
+    classDef teal fill:#63e6be
 
     class TR,IN purple
     class IS blue
@@ -77,10 +77,10 @@ graph LR
     FX --> CR[/code-review<br/>V4 Flash/]
     CR --> DN[Done]
 
-    classDef red fill:#ffa8a8
-    classDef purple fill:#b197fc
-    classDef green fill:#8ce99a
-    classDef teal fill:#96f2d7
+    classDef red fill:#ff8787
+    classDef purple fill:#9775fa
+    classDef green fill:#69db7c
+    classDef teal fill:#63e6be
 
     class LO red
     class HY purple
@@ -101,11 +101,11 @@ graph LR
     IM --> CR[/code-review<br/>V4 Flash/]
     CR --> DN[Done]
 
-    classDef yellow fill:#ffd43b
-    classDef green fill:#8ce99a
-    classDef blue fill:#74c0fc
-    classDef orange fill:#ffc078
-    classDef teal fill:#96f2d7
+    classDef yellow fill:#fcc419
+    classDef green fill:#69db7c
+    classDef blue fill:#4dabf7
+    classDef orange fill:#ffa94d
+    classDef teal fill:#63e6be
 
     class AS yellow
     class SP green
@@ -124,8 +124,8 @@ graph LR
     PR[/prototype<br/>V4 Flash / MiMo V2.5/] --> IT[Iterate<br/>V4 Flash / MiMo V2.5]
     IT -.->|loop| PR
 
-    classDef orange fill:#ffc078
-    classDef purple fill:#b197fc
+    classDef orange fill:#ffa94d
+    classDef purple fill:#9775fa
 
     class PR orange
     class IT purple
