@@ -5,6 +5,8 @@ Inspired by **Matt Pocock's** skills — real engineering, not vibe coding.
 Uses **OpenCode Go** subscription ($5 first mo → $10/mo, $60/mo usage cap).
 All skills from [`mattpocock/skills`](https://github.com/mattpocock/skills).
 
+A visual pipeline diagram is at `pipeline.excalidraw` — drag it onto [excalidraw.com](https://excalidraw.com) to view.
+
 ---
 
 ## Model Reference
@@ -19,7 +21,7 @@ Pricing via OpenCode Go. "Req/5h" = estimated requests per 5-hour rolling window
 | **Kimi K2.7 Code** | $0.95 | $4.00 | 1,350 | 6,750 | 256K | Coding-focused. More req than K2.6. Great mid-tier planner. |
 | **DeepSeek V4 Flash** | $0.14 | $0.28 | **31,650** | 158,150 | 1M | Default workhorse. 79% SWE-bench Verified. Cheap. Fast. |
 | **MiMo V2.5** | $0.14 | $0.28 | 30,100 | 150,400 | 1M | Budget workhorse. Same price as Flash, 1M context. |
-| **MiniMax M2.5** | $0.30 | $1.20 | 6,300 | 31,500 | 205K | Best cost-per-benchmark-point (80.2% SWE-bench at $0.30). |
+| **MiniMax M2.5** | $0.30 | $1.20 | 6,300 | 31,500 | 205K | Best cost-per-benchmark-point (80.2% at $0.30). |
 
 ---
 
@@ -27,218 +29,225 @@ Pricing via OpenCode Go. "Req/5h" = estimated requests per 5-hour rolling window
 
 ### 1. NEW PROJECT (from scratch)
 
-The full pipeline — every stage matters when you're building something new.
-
 ```
-[Triage] → [Interview] → [Domain Model] → [Spec] → [Tickets] → [Implement] → [Review]
+                 K2.7 Code        K2.7 Code       Qwen3.7 Max        V4 Flash          V4 Pro/K2.6        V4 Flash
+[Triage] ─────► [Interview] ───► [Spec] ───────► [Tickets] ──────► [Implement] ─────► [Code Review] ──► DONE
+  Plan              Plan            Plan              Plan              Build               Plan
+  /triage       /grill-with-docs  /to-spec          /to-tickets       /implement           /code-review
+                                                            ▲                      ▲
+                                                     simple? ◄┘           complex? ◄┘
+                                                        V4 Flash             V4 Pro
 ```
 
-| Stage | Command | Agent | **Model** | Why this model | Est. requests | Est. cost |
+| Stage | Command | Agent | **Model** | Why | Est. req | Est. cost |
 |---|---|---|---|---|---|---|
-| **1. Triage** | `/triage` | Plan | **K2.7 Code** | Reading and categorizing issues. Needs good instruction-following, not max reasoning. 1,350 req/5h is plenty. | 1-2 | ~$0.06 |
-| **2. Interview** | `/grill-with-docs` "interview me about [PROJECT]" | Plan | **K2.7 Code** | Research-heavy — reading docs, asking questions, exploring codebase. No code written. K2.7 Code's 256K context handles doc ingestion. Flash is cheaper but K2.7 Code gives better structured output for the domain model step. | 3-8 | ~$0.25 |
-| **3. Domain Model** | `/domain-modeling` (called by grill-with-docs) | Plan | **same as above** | Builds CONTEXT.md glossary & ADRs. Tightly coupled to interview — same session, same model. | (included) | — |
-| **4. Spec** | `/to-spec** | Plan | **Qwen3.7 Max** | Synthesis of everything discussed into a formal spec. This needs the best reasoning — Qwen3.7 Max has 60.6% SWE-bench Pro (highest in Go). The $2.50/$7.50 price is worth it for a correct spec. Only ~1 req. | 1-2 | ~$0.08 |
-| **5. Tickets** | `/to-tickets` | Plan | **V4 Flash** | Breaking spec into tracer-bullet tickets is mechanical — find vertical slices, wire blocking edges. Flash at $0.14/$0.28 is more than sufficient. | 3-5 | ~$0.01 |
-| **6. Implement** | `/implement` (+ `/tdd`) | **Build** (Tab to switch) | **DeepSeek V4 Pro** or **Kimi K2.6** | This is where real code gets written. V4 Pro: 1M context for large codebases, LiveCodeBench 93.5%. K2.6: Agent Swarm for complex multi-file changes. 3,450 req/5h on V4 Pro is generous. | 5-15 | ~$0.26 |
-| **7. Code Review** | `/code-review` | Plan | **V4 Flash** | Reading diffs + checking against standards/spec. Flash at 79% SWE-bench Verified handles code review perfectly. Never waste an expensive model here. | 2-4 | ~$0.01 |
+| **Triage** | `/triage` | Plan | **K2.7 Code** | Categorizing, reading issues. Needs instruction-following, not max reasoning. | 1-2 | ~$0.06 |
+| **Interview** | `/grill-with-docs` | Plan | **K2.7 Code** | Research-heavy: read docs, ask questions, explore codebase, build CONTEXT.md. No code written. | 3-8 | ~$0.25 |
+| **Spec** | `/to-spec` | Plan | **Qwen3.7 Max** | Synthesize everything into formal spec. Needs best reasoning — 60.6% SWE-bench Pro. | 1-2 | ~$0.08 |
+| **Tickets** | `/to-tickets` | Plan | **V4 Flash** | Break into tracer-bullet vertical slices with blocking edges. Mechanical. | 3-5 | ~$0.01 |
+| **Implement** (simple) | `/implement` | **Build** | **V4 Flash** | Single-file, straightforward logic. Flash is 79% SWE-bench Verified. | 5-10 | ~$0.01 |
+| **Implement** (complex) | `/implement` | **Build** | **V4 Pro** or **K2.6** | Multi-file, 1M context, complex logic. V4 Pro: LiveCodeBench 93.5%. K2.6: Agent Swarm. | 5-15 | ~$0.26 |
+| **Code Review** | `/code-review` | Plan | **V4 Flash** | Read diffs, check standards/spec. Never waste expensive model here. | 2-4 | ~$0.01 |
 
 **Total per feature:** ~20-40 requests, **~$0.70** of your $60 monthly budget.
 
 ---
 
-### 2. ADDING A FEATURE (to existing project)
-
-Lighter — skips spec unless the feature is complex.
+### 2. ADDING A FEATURE
 
 ```
-[Triage] → [Interview] → [Implement] → [Review]
+          K2.7 Code        K2.7 Code              V4 Flash / V4 Pro        V4 Flash
+[Triage] ────► [Interview] ───► {complex?} ────► [Implement] ──────────► [Code Review] ──► DONE
+  Plan          Plan             Y ──> V4 Pro        Build                    Plan
+  /triage     /grill-with-docs   N ──> V4 Flash    /implement               /code-review
 ```
 
-| Stage | Command | Agent | **Model** | Why |
+| Stage | Command | Agent | Model | Why |
 |---|---|---|---|---|
 | **Triage** | `/triage` | Plan | **K2.7 Code** | Quick categorization. |
-| **Interview** | `/grill-with-docs` "interview me about [FEATURE]" | Plan | **K2.7 Code** | Research the existing codebase + what needs to change. K2.7 Code is good at understanding code structure. |
-| **Implement** | `/implement` | **Build** | **V4 Pro** or **K2.6** | Feature implementation. If the feature is straightforward (single file, simple logic), **V4 Flash** is fine — escalate only if Flash struggles. |
-| **Review** | `/code-review` | Plan | **V4 Flash** | Cheap review pass. |
-
-**Model escalation rule for implement:**
-- Single function / small change → **V4 Flash** ($0.14/$0.28)
-- Multi-file feature → **V4 Pro** (1M ctx, 93.5% LiveCodeBench)
-- Complex agentic work (many coordinated changes) → **Kimi K2.6** (Agent Swarm)
+| **Interview** | `/grill-with-docs` | Plan | **K2.7 Code** | Research existing codebase + what needs to change. |
+| **Implement** (simple) | `/implement` | **Build** | **V4 Flash** | Straightforward feature, single file. |
+| **Implement** (complex) | `/implement` | **Build** | **V4 Pro** | Multi-file, complex logic. Escalate if Flash struggles. |
+| **Code Review** | `/code-review` | Plan | **V4 Flash** | Cheap review pass. |
 
 ---
 
-### 3. BUG FIX
-
-Matt Pocock's `/diagnosing-bugs` skill is a 6-phase discipline. Use it.
+### 3. BUG FIX (6-phase diagnosis)
 
 ```
-[Diagnose] → [Fix] → [Review]
+                    V4 Flash           K2.7 Code          V4 Pro         V4 Flash
+[Build Loop] ──► [Reproduce] ──► [Hypothesize] ──► [Fix + Regr.] ──► [Code Review] ──► DONE
+   Build            Build             Plan               Build              Plan
+ /diagnosing-bugs                                       /implement         /code-review
 ```
 
-| Stage | Command | Agent | **Model** | Why |
+Matt Pocock's `/diagnosing-bugs` is a 6-phase discipline. **Phase 1 is the most important** — build a tight red/green feedback loop before anything else.
+
+| Phase | Steps | Agent | Model | Why |
 |---|---|---|---|---|
-| **Phases 1-2: Build loop + Reproduce** | `/diagnosing-bugs` | **Build** | **V4 Flash** | Building test harnesses, running repro scripts. This is mechanical — writing code to catch the bug. Flash is fast and cheap. |
-| **Phases 3-4: Hypothesise + Instrument** | `/diagnosing-bugs` | Plan | **K2.7 Code** or **K2.6** | Requires reasoning about what could cause the bug. K2.7 Code is fine for most bugs. Escalate to K2.6 or Qwen3.7 Max for hard heisenbugs. |
-| **Phase 5: Fix** | (manual code change) | **Build** | **V4 Pro** | Writing the actual fix. Use Pro for correctness. |
-| **Phase 6: Cleanup + regression test** | (manual) | **Build** | **V4 Flash** | Removing debug logs, committing. Cheap. |
-| **Review** | `/code-review` | Plan | **V4 Flash** | Cheap review. |
-
-**Key insight from Matt's skill:** Phase 1 (build a feedback loop) is the most important step. Don't move to hypothesizing until you have a tight red/green signal. Use **V4 Flash** here because you'll iterate many times — cost adds up fast.
+| **Ph 1: Feedback loop** | Build harness, test, curl, script, etc. | **Build** | **V4 Flash** | Mechanical — write code to catch the bug. Iterate many times, so cost matters. |
+| **Ph 2: Reproduce+minimise** | Run loop, shrink to minimal repro. | **Build** | **V4 Flash** | Lots of iterations. Flash is fast and cheap. |
+| **Ph 3: Hypothesise** | Generate 3-5 ranked falsifiable hypotheses. | Plan | **K2.7 Code** (or K2.6 for hard bugs) | Requires reasoning about causality. Show ranked list to user before testing. |
+| **Ph 4: Instrument** | Change one variable at a time. Tag every debug log. | Plan | **V4 Flash** | Running probes, testing predictions. High volume. |
+| **Ph 5: Fix + regr. test** | Write regression test before fix. Watch fail→fix→pass. | **Build** | **V4 Pro** | The fix itself. Use Pro for correctness. |
+| **Ph 6: Cleanup** | Remove debug tags, commit, post-mortem. | **Build** | **V4 Flash** | Mechanical cleanup. |
 
 ---
 
 ### 4. ARCHITECTURE REDESIGN
 
-Requires the heaviest models for planning.
-
 ```
-[Architecture Scan] → [Spec] → [Tickets] → [Implement] → [Review]
+     Qwen3.7 Max        Qwen3.7 Max       V4 Flash          V4 Pro/K2.6       V4 Flash
+[Arch Scan] ──────► [Spec] ──────────► [Tickets] ──────► [Implement] ────► [Code Review] ──► DONE
+   Plan                Plan              Plan               Build               Plan
+ /improve-codebase-   /to-spec          /to-tickets        /implement           /code-review
+ architecture
 ```
 
-| Stage | Command | Agent | **Model** | Why |
+| Stage | Command | Agent | Model | Why |
 |---|---|---|---|---|
-| **Architecture scan** | `/improve-codebase-architecture` | Plan | **Qwen3.7 Max** | This produces an HTML report of deepening opportunities. Needs the deepest reasoning — Qwen3.7 Max has 60.6% SWE-bench Pro and 69.7% Terminal-Bench 2.0. |
+| **Architecture scan** | `/improve-codebase-architecture` | Plan | **Qwen3.7 Max** | Produces HTML report of deepening opportunities. Needs max reasoning (60.6% SWE-bench Pro, 69.7% Terminal-Bench). |
 | **Spec** | `/to-spec` | Plan | **Qwen3.7 Max** | Same session, same reasoning requirements. |
 | **Tickets** | `/to-tickets` | Plan | **V4 Flash** | Breaking into tickets is mechanical. |
-| **Implement** | `/implement` | **Build** | **V4 Pro** | Large-scale code changes need 1M context. |
-| **Review** | `/code-review` | Plan | **V4 Flash** | Cheap review. |
+| **Implement** | `/implement` | **Build** | **V4 Pro** | Large-scale changes need 1M context. |
+| **Code Review** | `/code-review` | Plan | **V4 Flash** | Cheap review. |
 
 ---
 
 ### 5. PROTOTYPE / SPIKE
 
-Throwaway code to answer a question. Speed > quality.
-
 ```
-[Prototype] → [Iterate]
+        V4 Flash / MiMo V2.5           V4 Flash / MiMo V2.5
+[Prototype] ──────────────────────► [Iterate] ───────────────► ...
+   Build                              Build
+ /prototype
 ```
 
-| Stage | Command | Agent | **Model** | Why |
+Throwaway code to answer a question. Speed > quality. Never use expensive models.
+
+| Stage | Command | Agent | Model | Why |
 |---|---|---|---|---|
-| **Prototype** | `/prototype` | **Build** | **V4 Flash** or **MiMo V2.5** | Prototype code is throwaway by definition. Use the cheapest model. Both have ~30,000 req/5h = unlimited. MiMo V2.5 gives you 1M context at the same price. |
+| **Prototype** | `/prototype` | **Build** | **V4 Flash** or **MiMo V2.5** | ~30,000 req/5h = unlimited. MiMo gives 1M context at same price. |
 | **Iterate** | manual | **Build** | Same | |
 
 ---
 
-### 6. COMPLEX FEATURE (Wayfinder)
-
-For projects too big for one agent session. Matt's `/wayfinder` skill creates a map of decision tickets (research, prototype, grilling, task).
+### 6. WAYFINDER (complex project, multiple sessions)
 
 ```
-[Chart Map] → [Resolve Tickets One at a Time]
+      Qwen3.7 Max          V4 Flash        K2.7 Code         V4 Flash
+[Chart Map] ───────► [Research ──► [Grill Tickets] ──► [Task ──► [Done]
+   Plan                 tickets]         Plan                Build
+ /wayfinder              Subagent        /grill-with-docs
+                        /research
 ```
 
-| Stage | Command | Agent | **Model** | Why |
+For projects too big for one agent session. Creates a **map** of decision tickets on the issue tracker.
+
+| Stage | Command | Agent | Model | Why |
 |---|---|---|---|---|
-| **Chart the map** | `/wayfinder` | Plan | **Qwen3.7 Max** | Naming the destination, surfacing fog, creating the initial tickets. Needs max reasoning. |
-| **Research tickets** | (automatic subagent) | Subagent | **V4 Flash** | Reading docs, investigating APIs. High volume, cheap. |
-| **Prototype tickets** | `/prototype` | **Build** | **V4 Flash** | Throwaway code. |
-| **Grilling tickets** | `/grill-with-docs` | Plan | **K2.7 Code** | Conversation with user to sharpen decisions. |
+| **Chart the map** | `/wayfinder` | Plan | **Qwen3.7 Max** | Name destination, surface fog, create initial tickets. Needs max reasoning. |
+| **Research tickets** | (auto subagent) | Subagent | **V4 Flash** | Read docs, investigate APIs. High volume, cheap. |
+| **Prototype tickets** | `/prototype` | **Build** | **V4 Flash** | Throwaway code to answer design questions. |
+| **Grilling tickets** | `/grill-with-docs` | Plan | **K2.7 Code** | Conversation to sharpen decisions one at a time. |
 | **Task tickets** | manual | **Build** | **V4 Flash** | Mechanical setup work. |
 
 ---
 
-## Specific Prompt Guidance Per Stage
+## Prompt Guidance Per Stage
 
 ### `/grill-with-docs` — The Interview
 
-Matt's skill does not interview randomly — it follows a specific pattern:
-
-1. Explore the codebase first (understand current state)
-2. Use `/domain-modeling` to challenge fuzzy terms — when you say "user", do you mean the Customer or the Account Holder?
-3. Write terms to `CONTEXT.md` as they crystallize
-4. Offer ADRs sparingly — only when the decision is:
-   - **Hard to reverse**
-   - **Surprising without context**
-   - **Result of a real trade-off**
-
-**Prompt template:**
 ```
-/grill-with-docs interview me about building a [FEATURE] for [PROJECT].
+/grill-with-docs interview me about [FEATURE].
 I want to understand the domain, the problem, and what a good solution looks like.
 ```
 
+Matt's skill:
+1. Explores codebase first (understand current state)
+2. Uses `/domain-modeling` to challenge fuzzy terms — when you say "user", do you mean Customer or Account Holder?
+3. Writes terms to `CONTEXT.md` as they crystallize (not batched)
+4. Offers ADRs sparingly — only when **hard to reverse + surprising + real trade-off**
+
 ### `/to-spec` — From Conversation to Spec
 
-The skill synthesizes what you already discussed — do NOT re-interview. It produces:
+Synthesizes what you already discussed — do NOT re-interview. Produces 6 sections:
 
-1. **Problem Statement** — from user's perspective
-2. **Solution** — from user's perspective  
-3. **User Stories** — extensive numbered list (format: "As a <actor>, I want <feature>, so that <benefit>")
-4. **Implementation Decisions** — modules, interfaces, schemas, API contracts
-5. **Testing Decisions** — seams, what makes a good test for this
+1. **Problem Statement** — user's perspective
+2. **Solution** — user's perspective
+3. **User Stories** — extensive numbered list (As a <actor>, I want <feature>, so that <benefit>)
+4. **Implementation Decisions** — modules, interfaces, schemas, API contracts (no file paths/code snippets)
+5. **Testing Decisions** — seams, what makes a good test
 6. **Out of Scope** — explicitly what's NOT being built
-
-**Do NOT include file paths or code snippets.** They go stale. Only exception: if a prototype produced a decision-rich snippet (state machine, type shape), inline it with a note that it came from a prototype.
 
 ### `/to-tickets` — Breaking into Tickets
 
-Each ticket is a **tracer bullet** — a vertical slice through every layer:
-- Schema → API → Logic → Tests → UI (if applicable)
-- Each slice is demoable on its own
-- Sized to fit a single fresh context window
-- Blocking edges declared between tickets
+Each ticket is a **tracer bullet** — vertical slice through every layer:
+- Schema → API → Logic → Tests → UI
+- Each slice demoable on its own
+- Sized for one fresh context window
+- Blocking edges declared
 
-**Prompt to give after spec is ready:**
-```
-/to-tickets break the spec into vertical-slice tickets and publish them.
-```
+### `/implement` — Writing Code
 
-### `/implement` — Writing the Code
-
-Matt's skill is minimal — it just says "Implement the work described." Key behaviors:
-- Uses `/tdd` (test-driven development) where possible, at pre-agreed seams
+- Uses `/tdd` (test-driven development) at pre-agreed seams
 - Runs typechecking regularly
 - Runs single test files regularly
-- Runs the full test suite once at end
-- Then runs `/code-review` automatically
-- Commits to the current branch
+- Runs full test suite at end
+- Auto-runs `/code-review` at the end
+- Commits to current branch
 
 ### `/code-review` — Two-Axis Review
+
+```
+/code-review review since main
+```
 
 Runs **two parallel sub-agents**:
 - **Standards** — does code follow documented standards + Fowler code smells?
 - **Spec** — does code match what the issue/spec asked for?
 
-**Prompt:** Just run `/code-review` and specify the fixed point (commit, branch, or `main`):
-```
-/code-review review since main
-```
+Reports independently — a change can pass one axis and fail the other.
+
+### `/diagnosing-bugs` — 6 Phases
+
+| If someone says "it doesn't work" | Do NOT jump to hypothesizing |
+|----------------------------------|------------------------------|
+
+Phase 1 is the critical skill: build a tight red/green signal before anything else. A 2-second deterministic loop is a superpower. A 30-second flaky loop is barely useful.
 
 ---
 
-## Model Route Summary (Quick Reference)
+## Model Route Quick Reference
 
-| Task Type | Primary Model | Fallback | Est. req |
-|---|---|---|---|
-| Triage / categorize | K2.7 Code | V4 Flash | 1-2 |
-| Codebase research | K2.7 Code | V4 Flash | 3-8 |
-| Planning / spec / arch | Qwen3.7 Max | K2.6 | 1-3 |
-| Break into tickets | V4 Flash | K2.7 Code | 3-5 |
-| Implementation (simple) | V4 Flash | V4 Pro | 3-8 |
-| Implementation (complex) | V4 Pro or K2.6 | Qwen3.7 Max | 5-15 |
-| Debugging (loop build) | V4 Flash | K2.7 Code | 10-50 |
-| Debugging (hypothesis) | K2.7 Code | K2.6 | 3-5 |
-| Prototype | V4 Flash | MiMo V2.5 | 5-20 |
-| Code review | V4 Flash | K2.7 Code | 2-4 |
+| Task Type | Primary Model | Fallback | Agent | Est. req |
+|---|---|---|---|---|
+| Triage | K2.7 Code | V4 Flash | Plan | 1-2 |
+| Codebase research | K2.7 Code | V4 Flash | Plan | 3-8 |
+| Planning / spec / arch | Qwen3.7 Max | K2.6 | Plan | 1-3 |
+| Tickets | V4 Flash | K2.7 Code | Plan | 3-5 |
+| Implementation (simple) | V4 Flash | V4 Pro | Build | 3-8 |
+| Implementation (complex) | V4 Pro or K2.6 | Qwen3.7 Max | Build | 5-15 |
+| Debugging (loop) | V4 Flash | — | Build | 10-50 |
+| Debugging (hypothesis) | K2.7 Code | K2.6 | Plan | 3-5 |
+| Prototype | V4 Flash | MiMo V2.5 | Build | 5-20 |
+| Code review | V4 Flash | — | Plan | 2-4 |
 
 ---
 
 ## Budget Tracking
 
-$60/month total. A typical feature cycle costs ~$0.50-1.50 depending on complexity.
+$60/month. A typical feature cycle costs ~$0.50-1.50.
 That's **40-120 features per month** if you route correctly.
 
-| If you use... | Features/month (max) |
+| Routing strategy | Features/month (max) |
 |---|---|
-| Flash for everything | ~200+ (don't bother — use it for everything) |
-| Balanced routing (this guide) | ~60-120 |
-| Qwen3.7 Max for everything | ~5-10 (don't do this) |
+| Flash for everything | ~200+ |
+| **Balanced (this guide)** | **~60-120** |
+| Qwen3.7 Max for everything | ~5-10 (don't) |
 
 ---
 
 ## Learning & Iteration
 
-This workflow is living. As new models arrive on OpenCode Go and skills evolve, update this document. Track changes in git for a history of what changed and why.
+This workflow is living. As new models arrive and skills evolve, update this document.
