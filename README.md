@@ -2,7 +2,7 @@
 
 Inspired by **Matt Pocock's** skills -- real engineering, not vibe coding.
 
-Uses **OpenCode Go** ($5 first month, $10/month after, $60 usage cap).
+Uses **OpenCode Go**.
 All skills from [`mattpocock/skills`](https://github.com/mattpocock/skills).
 
 ---
