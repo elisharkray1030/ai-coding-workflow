@@ -521,7 +521,8 @@ Action: bump default for auth-scoped work to V4 Pro
 
 ---
 
-## Model Route Quick Reference
+<details>
+<summary><strong>Model Route Quick Reference</strong> — click to expand</summary>
 
 | Task Type | Default | Escalation | Est. req |
 |-----------|---------|------------|----------|
@@ -542,9 +543,12 @@ Action: bump default for auth-scoped work to V4 Pro
 | Wayfinder (re-chart) | Qwen3.7 Max | — | 1-2 |
 | Wayfinder (tickets) | V4 Flash | — | 3-10+ |
 
+</details>
+
 ---
 
-## Budget Tracking
+<details>
+<summary><strong>Budget Tracking</strong> — click to expand</summary>
 
 $60/month. A typical feature cycle costs ~**$0.04-0.25** with the default-first routing.
 That's **240-1,500 features per month** if you route correctly.
@@ -557,6 +561,8 @@ That's **240-1,500 features per month** if you route correctly.
 | Qwen3.7 Max for everything | ~5-10 (don't) |
 
 The buffer is now large enough ($40-50/month) that even heavy months with multiple architecture scans, wayfinders, and bug fixes won't break the budget.
+
+</details>
 
 ---
 
