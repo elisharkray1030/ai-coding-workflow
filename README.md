@@ -330,12 +330,26 @@ Throwaway code that answers a question. Speed over quality. Don't burn expensive
 
 ### 6. WAYFINDER (complex project, multiple sessions)
 
-```
-      Qwen3.7 Max          V4 Flash        K2.7 Code         V4 Flash
-[Chart Map] ───────► [Research ──► [Grill Tickets] ──► [Task ──► [Done]
-   Plan                 tickets]         Plan                Build
- /wayfinder              Subagent        /grill-with-docs
-                        /research
+```mermaid
+graph LR
+    CM[ /wayfinder<br/>Qwen3.7 Max] --> RS[ /research<br/>V4 Flash]
+    RS --> PR[ /prototype<br/>V4 Flash]
+    PR --> GR[ /grill-with-docs<br/>K2.7 Code]
+    GR --> TK[Task Tickets<br/>V4 Flash]
+    TK --> DN[Done]
+
+    classDef yellow fill:#fcc419,color:#000
+    classDef blue fill:#4dabf7,color:#000
+    classDef orange fill:#ffa94d,color:#000
+    classDef purple fill:#9775fa,color:#000
+    classDef teal fill:#63e6be,color:#000
+    classDef green fill:#69db7c,color:#000
+
+    class CM yellow
+    class RS,PR blue
+    class GR purple
+    class TK teal
+    class DN green
 ```
 
 For projects too big for one agent session. Creates a **map** of decision tickets on the issue tracker.
