@@ -155,6 +155,34 @@ Pricing via OpenCode Go. "Req/5h" = estimated requests per 5-hour rolling window
 
 ### 1. NEW PROJECT (from scratch)
 
+```mermaid
+graph LR
+    TR[ /triage<br/>K2.7 Code] --> IN[ /grill-with-docs<br/>K2.7 Code]
+    IN --> SP[ /to-spec<br/>Qwen3.7 Max]
+    SP --> TK[ /to-tickets<br/>V4 Flash]
+    TK --> D{Complex?}
+    D -->|Yes| IC[ /implement<br/>V4 Pro / K2.6]
+    D -->|No| IS[ /implement<br/>V4 Flash]
+    IC --> CR[ /code-review<br/>V4 Flash]
+    IS --> CR
+    CR --> DN[Done]
+
+    classDef purple fill:#9775fa,color:#000
+    classDef green fill:#69db7c,color:#000
+    classDef blue fill:#4dabf7,color:#000
+    classDef orange fill:#ffa94d,color:#000
+    classDef teal fill:#63e6be,color:#000
+    classDef yellow fill:#fcc419,color:#000
+    classDef red fill:#ff8787,color:#000
+
+    class TR,IN purple
+    class SP green
+    class TK,IS blue
+    class IC orange
+    class CR teal
+    class DN green
+```
+
 ```
                  K2.7 Code        K2.7 Code       Qwen3.7 Max        V4 Flash          V4 Pro/K2.6        V4 Flash
 [Triage] ─────► [Interview] ───► [Spec] ───────► [Tickets] ──────► [Implement] ─────► [Code Review] ──► DONE
@@ -181,6 +209,29 @@ Pricing via OpenCode Go. "Req/5h" = estimated requests per 5-hour rolling window
 
 ### 2. ADDING A FEATURE
 
+```mermaid
+graph LR
+    TR[ /triage<br/>K2.7 Code] --> IN[ /grill-with-docs<br/>K2.7 Code]
+    IN --> D{Complex?}
+    D -->|Yes| IC[ /implement<br/>V4 Pro]
+    D -->|No| IS[ /implement<br/>V4 Flash]
+    IC --> CR[ /code-review<br/>V4 Flash]
+    IS --> CR
+    CR --> DN[Done]
+
+    classDef purple fill:#9775fa,color:#000
+    classDef green fill:#69db7c,color:#000
+    classDef blue fill:#4dabf7,color:#000
+    classDef orange fill:#ffa94d,color:#000
+    classDef teal fill:#63e6be,color:#000
+
+    class TR,IN purple
+    class IS blue
+    class IC orange
+    class CR teal
+    class DN green
+```
+
 ```
           K2.7 Code        K2.7 Code              V4 Flash / V4 Pro        V4 Flash
 [Triage] ────► [Interview] ───► {complex?} ────► [Implement] ──────────► [Code Review] ──► DONE
@@ -199,6 +250,25 @@ Pricing via OpenCode Go. "Req/5h" = estimated requests per 5-hour rolling window
 ---
 
 ### 3. BUG FIX (6-phase diagnosis)
+
+```mermaid
+graph LR
+    LO[ /diagnosing-bugs<br/>Ph1-2: V4 Flash] --> HY[Hypothesize<br/>Ph3: K2.7 Code]
+    HY --> FX[Fix + Regr.<br/>Ph5-6: V4 Pro]
+    FX --> CR[ /code-review<br/>V4 Flash]
+    CR --> DN[Done]
+
+    classDef red fill:#ff8787,color:#000
+    classDef purple fill:#9775fa,color:#000
+    classDef green fill:#69db7c,color:#000
+    classDef teal fill:#63e6be,color:#000
+
+    class LO red
+    class HY purple
+    class FX green
+    class CR teal
+    class DN green
+```
 
 ```
                     V4 Flash           K2.7 Code          V4 Pro         V4 Flash
@@ -222,6 +292,28 @@ Matt Pocock's `/diagnosing-bugs` is a 6-phase discipline. **Phase 1 is where the
 
 ### 4. ARCHITECTURE REDESIGN
 
+```mermaid
+graph LR
+    AS[ /arch-scan<br/>Qwen3.7 Max] --> SP[ /to-spec<br/>Qwen3.7 Max]
+    SP --> TK[ /to-tickets<br/>V4 Flash]
+    TK --> IM[ /implement<br/>V4 Pro]
+    IM --> CR[ /code-review<br/>V4 Flash]
+    CR --> DN[Done]
+
+    classDef yellow fill:#fcc419,color:#000
+    classDef green fill:#69db7c,color:#000
+    classDef blue fill:#4dabf7,color:#000
+    classDef orange fill:#ffa94d,color:#000
+    classDef teal fill:#63e6be,color:#000
+
+    class AS yellow
+    class SP green
+    class TK blue
+    class IM orange
+    class CR teal
+    class DN green
+```
+
 ```
      Qwen3.7 Max        Qwen3.7 Max       V4 Flash          V4 Pro/K2.6       V4 Flash
 [Arch Scan] ──────► [Spec] ──────────► [Tickets] ──────► [Implement] ────► [Code Review] ──► DONE
@@ -241,6 +333,18 @@ Matt Pocock's `/diagnosing-bugs` is a 6-phase discipline. **Phase 1 is where the
 ---
 
 ### 5. PROTOTYPE / SPIKE
+
+```mermaid
+graph LR
+    PR[ /prototype<br/>V4 Flash / MiMo V2.5] --> IT[Iterate<br/>V4 Flash / MiMo V2.5]
+    IT -.->|loop| PR
+
+    classDef orange fill:#ffa94d,color:#000
+    classDef purple fill:#9775fa,color:#000
+
+    class PR orange
+    class IT purple
+```
 
 ```
         V4 Flash / MiMo V2.5           V4 Flash / MiMo V2.5
