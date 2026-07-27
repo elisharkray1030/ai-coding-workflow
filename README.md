@@ -183,15 +183,6 @@ graph LR
     class DN green
 ```
 
-```
-                 K2.7 Code        K2.7 Code       Qwen3.7 Max        V4 Flash          V4 Pro/K2.6        V4 Flash
-[Triage] ─────► [Interview] ───► [Spec] ───────► [Tickets] ──────► [Implement] ─────► [Code Review] ──► DONE
-  Plan              Plan            Plan              Plan              Build               Plan
-  /triage       /grill-with-docs  /to-spec          /to-tickets       /implement           /code-review
-                                                            ▲                      ▲
-                                                     simple? ◄┘           complex? ◄┘
-                                                        V4 Flash             V4 Pro
-```
 
 | Stage | Command | Agent | **Model** | Why | Est. req | Est. cost |
 |---|---|---|---|---|---|---|
@@ -232,12 +223,6 @@ graph LR
     class DN green
 ```
 
-```
-          K2.7 Code        K2.7 Code              V4 Flash / V4 Pro        V4 Flash
-[Triage] ────► [Interview] ───► {complex?} ────► [Implement] ──────────► [Code Review] ──► DONE
-  Plan          Plan             Y ──> V4 Pro        Build                    Plan
-  /triage     /grill-with-docs   N ──> V4 Flash    /implement               /code-review
-```
 
 | Stage | Command | Agent | Model | Why |
 |---|---|---|---|---|
@@ -270,12 +255,6 @@ graph LR
     class DN green
 ```
 
-```
-                    V4 Flash           K2.7 Code          V4 Pro         V4 Flash
-[Build Loop] ──► [Reproduce] ──► [Hypothesize] ──► [Fix + Regr.] ──► [Code Review] ──► DONE
-   Build            Build             Plan               Build              Plan
- /diagnosing-bugs                                       /implement         /code-review
-```
 
 Matt Pocock's `/diagnosing-bugs` is a 6-phase discipline. **Phase 1 is where the real work happens** -- build a tight red/green feedback loop before you do anything else.
 
@@ -314,13 +293,6 @@ graph LR
     class DN green
 ```
 
-```
-     Qwen3.7 Max        Qwen3.7 Max       V4 Flash          V4 Pro/K2.6       V4 Flash
-[Arch Scan] ──────► [Spec] ──────────► [Tickets] ──────► [Implement] ────► [Code Review] ──► DONE
-   Plan                Plan              Plan               Build               Plan
- /improve-codebase-   /to-spec          /to-tickets        /implement           /code-review
- architecture
-```
 
 | Stage | Command | Agent | Model | Why |
 |---|---|---|---|---|
@@ -346,12 +318,6 @@ graph LR
     class IT purple
 ```
 
-```
-        V4 Flash / MiMo V2.5           V4 Flash / MiMo V2.5
-[Prototype] ──────────────────────► [Iterate] ───────────────► ...
-   Build                              Build
- /prototype
-```
 
 Throwaway code that answers a question. Speed over quality. Don't burn expensive models here.
 
