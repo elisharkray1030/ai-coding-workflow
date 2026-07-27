@@ -194,7 +194,7 @@ graph LR
 | **Implement** (complex) | `/implement` | **Build** | **V4 Pro** or **K2.6** | Multi-file, 1M context, complex logic. V4 Pro: LiveCodeBench 93.5%. K2.6: Agent Swarm. | 5-15 | ~$0.26 |
 | **Code Review** | `/code-review` | Plan | **V4 Flash** | Read diffs, check standards and spec. No need to burn an expensive model here. | 2-4 | ~$0.01 |
 
-**Total per feature:** ~20-40 requests, **~$0.70** of your $60 monthly budget.
+**Total per feature:** ≈20-40 requests, **≈$0.70** of your $60 monthly budget.
 
 ---
 
