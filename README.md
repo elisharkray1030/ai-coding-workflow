@@ -28,7 +28,8 @@ The savings are dramatic: ~$0.04 for a simple feature vs ~$0.42 with the old mod
 
 ---
 
-## Pipeline Diagrams
+<details>
+<summary><strong>Pipeline Diagrams</strong> — click to expand</summary>
 
 ### 1. NEW PROJECT (from scratch)
 
@@ -38,8 +39,8 @@ graph LR
     IN --> SP[ /to-spec]
     SP --> TK[ /to-tickets]
     TK --> D{Complex?}
-    D -->|Yes| IC[ /implement]
-    D -->|No| IS[ /implement]
+    D -->|Complex| IC[ /implement · V4 Pro]
+    D -->|Simple| IS[ /implement · V4 Flash]
     IC --> CR[ /code-review]
     IS --> CR
     CR --> DN[Done]
@@ -60,18 +61,17 @@ graph LR
     class DN green
 ```
 
-Start with `/triage` to categorize the ask. `/grill-with-docs` interviews you about the domain, builds CONTEXT.md. `/to-spec` formalizes what was discussed. `/to-tickets` breaks it into vertical-slice tickets with blocking edges. `/implement` writes the code — V4 Flash by default, V4 Pro if the implementation fails quality gates. `/code-review` checks standards and spec compliance.
+Start with `/triage` to categorize and route the ask. It runs a small state machine: `needs-triage` → `needs-info` (if ambiguous) → `ready-for-agent` or `ready-for-human`. Category labels (`bug`/`enhancement`) are set upfront. For PRs, the same states apply but read against the attached code. `/grill-with-docs` interviews you about the domain, builds CONTEXT.md. `/to-spec` formalizes what was discussed. `/to-tickets` breaks it into vertical-slice tickets with blocking edges. `/implement` writes the code — V4 Flash by default, V4 Pro if the implementation fails quality gates. `/code-review` checks standards and spec compliance.
 
 ### 2. ADDING A FEATURE
 
 ```mermaid
 graph LR
     TR[ /triage] --> IN[ /grill-with-docs]
-    IN --> D{Complex?}
-    D -->|Yes| IC[ /implement]
-    D -->|No| IS[ /implement]
-    IC --> CR[ /code-review]
-    IS --> CR
+    IN --> IM[ /implement]
+    IM --> Q{Pass?}
+    Q -->|Yes| CR[ /code-review]
+    Q -->|No| IM
     CR --> DN[Done]
 
     classDef purple fill:#9775fa,color:#000
@@ -81,8 +81,7 @@ graph LR
     classDef teal fill:#63e6be,color:#000
 
     class TR,IN purple
-    class IS blue
-    class IC orange
+    class IM orange
     class CR teal
     class DN green
 ```
@@ -178,11 +177,22 @@ graph LR
     class DN green
 ```
 
-For projects too big for one agent session. Creates a **map** of decision tickets on the issue tracker. `/wayfinder` charts the initial map with Qwen3.7 Max — charting unknown territory needs max reasoning. Everything after is V4 Flash sub-agents: research tickets, prototype tickets, grilling tickets, task tickets.
+For projects too big for one agent session. Creates a **map** of decision tickets on the issue tracker — not build tickets, but questions whose resolution is a decision that unblocks the path forward.
+
+**How it works:**
+- **Charting** — `/wayfinder` (Qwen3.7 Max always) names the destination, identifies what's known vs fog, and creates the initial tickets. The map is a single issue with: Destination, Notes, Decisions so far, Not yet specified (fog of war), Out of scope.
+- **Frontier** — tickets graduate from "fog" (not yet specified) into concrete decision tickets as the frontier advances. Each ticket is sized for one 100K-token agent session.
+- **Resolution** — each ticket is resolved independently by a V4 Flash sub-agent. A ticket closes when its question is answered (not when code is written), producing a decision recorded in the map's "Decisions so far" section.
+- **Done** — the map is complete when the way is clear: no decisions left to make before someone can go build the thing. The output is a handoff (spec, decision log, or change made in place), not a delivery.
+
+Everything after charting runs on V4 Flash sub-agents: research tickets, prototype tickets, grilling tickets, task tickets. Only a map re-chart (when the destination shifts or the frontier reveals the initial map was wrong) goes back to Qwen3.7 Max.
+
+</details>
 
 ---
 
-## Model Reference
+<details>
+<summary><strong>Model Reference</strong> — click to expand pricing table</summary>
 
 Pricing via OpenCode Go. "Req/5h" = estimated requests per 5-hour rolling window.
 
@@ -202,7 +212,10 @@ Pricing via OpenCode Go. "Req/5h" = estimated requests per 5-hour rolling window
 | **MiMo V2.5 Pro** | $0.435 | $0.87 | 3,250 | 16,300 | 1M | Upgraded MiMo. Same price tier as V4 Pro, lower request cap. |
 | **MiniMax M3** | $0.30 | $1.20 | 3,200 | 16,000 | 1M | MiniMax's latest. Improved over M2.7 at same price. |
 | **Qwen3.7 Plus** | $0.40 | $1.60 | 4,300 | 21,600 | 1M | Strong mid-tier Qwen. Good balance of cost and quality. |
+| **Qwen3.6 Plus** | $0.50 | $3.00 | 3,300 | 16,300 | 256K | Earlier Qwen gen at mid-range pricing. Solid reasoning. |
 | **Hy3** | $0.14 | $0.58 | 4,300 | 21,500 | 128K | Budget model. High throughput at Flash-like input pricing. |
+
+</details>
 
 ---
 
@@ -216,8 +229,8 @@ graph LR
     IN --> SP[ /to-spec]
     SP --> TK[ /to-tickets]
     TK --> D{Complex?}
-    D -->|Yes| IC[ /implement]
-    D -->|No| IS[ /implement]
+    D -->|Complex| IC[ /implement · V4 Pro]
+    D -->|Simple| IS[ /implement · V4 Flash]
     IC --> CR[ /code-review]
     IS --> CR
     CR --> DN[Done]
@@ -240,7 +253,7 @@ graph LR
 
 | Stage | Default | Escalation | Why |
 |-------|---------|------------|-----|
-| **Triage** | V4 Flash | — | Greenfield has no codebase to read. Simple categorization. |
+| **Triage** | V4 Flash | K2.7 Code if misclassifies consistently | Routes through state machine (needs-triage → ready-for-agent/human). Greenfield has no codebase, so it's cheap. |
 | **Interview** | V4 Flash | — | Domain conversation, no codebase research. Flash handles this fine. |
 | **Spec** | V4 Flash | V4 Pro if spec misses architectural nuance | Synthesis of existing conversation. Pure formatting. |
 | **Tickets** | V4 Flash | — | Mechanical breakdown. |
@@ -257,11 +270,10 @@ graph LR
 ```mermaid
 graph LR
     TR[ /triage] --> IN[ /grill-with-docs]
-    IN --> D{Complex?}
-    D -->|Yes| IC[ /implement]
-    D -->|No| IS[ /implement]
-    IC --> CR[ /code-review]
-    IS --> CR
+    IN --> IM[ /implement]
+    IM --> Q{Pass?}
+    Q -->|Yes| CR[ /code-review]
+    Q -->|No| IM
     CR --> DN[Done]
 
     classDef purple fill:#9775fa,color:#000
@@ -271,8 +283,7 @@ graph LR
     classDef teal fill:#63e6be,color:#000
 
     class TR,IN purple
-    class IS blue
-    class IC orange
+    class IM orange
     class CR teal
     class DN green
 ```
@@ -357,7 +368,7 @@ graph LR
 | **Implement** | **V4 Pro** | Large-scale changes need 1M context. |
 | **Code Review** | **V4 Flash** | Review pass. |
 
-**Est. cost:** ~**$0.25**
+**Est. cost:** light ~**$0.08** | deep ~**$0.25**
 
 ---
 
@@ -410,11 +421,14 @@ graph LR
     class DN green
 ```
 
-For projects too big for one agent session. Creates a **map** of decision tickets on the issue tracker.
+For projects too big for one agent session. Creates a **map** of decision tickets on the issue tracker. Not build tickets — questions whose resolution unblocks the path forward.
+
+The map is a single issue with: Destination, Notes, Decisions so far, Not yet specified (fog of war), Out of scope. Tickets graduate from fog → concrete as the frontier advances. Each ticket is sized for one 100K-token agent session and resolved independently. The map is done when the way is clear — no decisions left before someone can go build the thing. Only a re-chart (destination shift or wrong initial map) goes back to Qwen3.7 Max.
 
 | Stage | Model | Why |
 |-------|-------|-----|
 | **Chart the map** | **Qwen3.7 Max** (always) | Name the destination, surface fog, create the initial tickets. Needs max reasoning. Non-negotiable. |
+| **Re-chart** | **Qwen3.7 Max** (only when needed) | Destination shifted or the initial map was wrong. Rare — only when frontier reveals a fundamentally incorrect map. |
 | **Research tickets** | **V4 Flash** | Read docs, investigate APIs. High volume, cheap. |
 | **Prototype tickets** | **V4 Flash** | Throwaway code to answer design questions. |
 | **Grilling tickets** | **V4 Flash** | Conversation to sharpen decisions one at a time. |
@@ -486,10 +500,32 @@ They report independently. A change can pass one axis and fail the other.
 
 Phase 1 is the critical step: build a tight red/green signal before anything else. A 2-second deterministic loop changes everything. A 30-second flaky loop is barely useful.
 
+---
+
+## Routing Feedback
+
+Escalations are data. If a task type keeps requiring escalation, the routing table should evolve.
+
+**Track escalations per task type.** After each project or sprint, note which tasks escalated and to which model:
+
+```
+Task: cross-cutting feature-add to auth module
+Escalated: /implement → V4 Pro (structural failure)
+Pattern: 3rd time in 2 weeks
+Action: bump default for auth-scoped work to V4 Pro
+```
+
+**When to update the routing table:**
+- 3+ escalations of the same type in 2 weeks → change the default for that task type
+- A model you're routing to gets deprecated or replaced → update immediately
+- A new model at Flash prices outperforms Flash on your workload → swap the default
+
+**Keep it live.** This is a workflow doc — stale routing is worse than no routing. If a model gets better or cheaper, the defaults here should follow. The escalation table at the top is the first thing to touch when patterns emerge.
 
 ---
 
-## Model Route Quick Reference
+<details>
+<summary><strong>Model Route Quick Reference</strong> — click to expand</summary>
 
 | Task Type | Default | Escalation | Est. req |
 |-----------|---------|------------|----------|
@@ -502,14 +538,20 @@ Phase 1 is the critical step: build a tight red/green signal before anything els
 | Debugging (loop) | V4 Flash | — | 10-50 |
 | Debugging (hypothesis) | V4 Flash | K2.7 Code if stuck | 3-5 |
 | Debugging (fix) | V4 Flash | V4 Pro if fix fails tests | 2-5 |
-| Architecture scan | Qwen3.7 Max | — | 1-3 |
+| Architecture scan (light) | Qwen3.7 Max | — | 1-2 |
+| Architecture scan (deep w/ grill loop) | Qwen3.7 Max | — | 3-6 |
 | Prototype | V4 Flash / MiMo | — | 5-20 |
 | Code review | V4 Flash | — | 2-4 |
 | Wayfinder (map) | Qwen3.7 Max | — | 1-3 |
+| Wayfinder (re-chart) | Qwen3.7 Max | — | 1-2 |
+| Wayfinder (tickets) | V4 Flash | — | 3-10+ |
+
+</details>
 
 ---
 
-## Budget Tracking
+<details>
+<summary><strong>Budget Tracking</strong> — click to expand</summary>
 
 $60/month. A typical feature cycle costs ~**$0.04-0.25** with the default-first routing.
 That's **240-1,500 features per month** if you route correctly.
@@ -522,6 +564,8 @@ That's **240-1,500 features per month** if you route correctly.
 | Qwen3.7 Max for everything | ~5-10 (don't) |
 
 The buffer is now large enough ($40-50/month) that even heavy months with multiple architecture scans, wayfinders, and bug fixes won't break the budget.
+
+</details>
 
 ---
 
