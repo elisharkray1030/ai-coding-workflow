@@ -23,14 +23,20 @@ graph LR
     IS --> CR
     CR --> DN[Done]
 
-    style TR fill:#b197fc,color:#1e1e1e
-    style IN fill:#b197fc,color:#1e1e1e
-    style SP fill:#8ce99a,color:#1e1e1e
-    style TK fill:#74c0fc,color:#1e1e1e
-    style IC fill:#ffc078,color:#1e1e1e
-    style IS fill:#74c0fc,color:#1e1e1e
-    style CR fill:#96f2d7,color:#1e1e1e
-    style DN fill:#8ce99a,color:#1e1e1e
+    classDef purple fill:#b197fc
+    classDef green fill:#8ce99a
+    classDef blue fill:#74c0fc
+    classDef orange fill:#ffc078
+    classDef teal fill:#96f2d7
+    classDef yellow fill:#ffd43b
+    classDef red fill:#ffa8a8
+
+    class TR,IN purple
+    class SP green
+    class TK,IS blue
+    class IC,PR orange
+    class CR teal
+    class DN green
 ```
 
 Start with `/triage` to categorize the ask. `/grill-with-docs` interviews you about the domain, builds CONTEXT.md. `/to-spec` formalizes what was discussed. `/to-tickets` breaks it into vertical-slice tickets with blocking edges. `/implement` writes the code -- V4 Flash for simple, V4 Pro or K2.6 for complex. `/code-review` checks standards and spec compliance.
@@ -47,12 +53,17 @@ graph LR
     IS --> CR
     CR --> DN[Done]
 
-    style TR fill:#b197fc,color:#1e1e1e
-    style IN fill:#b197fc,color:#1e1e1e
-    style IC fill:#ffc078,color:#1e1e1e
-    style IS fill:#74c0fc,color:#1e1e1e
-    style CR fill:#96f2d7,color:#1e1e1e
-    style DN fill:#8ce99a,color:#1e1e1e
+    classDef purple fill:#b197fc
+    classDef green fill:#8ce99a
+    classDef blue fill:#74c0fc
+    classDef orange fill:#ffc078
+    classDef teal fill:#96f2d7
+
+    class TR,IN purple
+    class IS blue
+    class IC orange
+    class CR teal
+    class DN green
 ```
 
 A lighter pipeline. `/triage` and `/grill-with-docs` research the existing codebase to understand context. Skip spec and tickets -- you're extending what's there, not starting fresh. `/implement` writes the feature, then `/code-review` checks it.
@@ -66,11 +77,16 @@ graph LR
     FX --> CR[/code-review<br/>V4 Flash]
     CR --> DN[Done]
 
-    style LO fill:#ffa8a8,color:#1e1e1e
-    style HY fill:#b197fc,color:#1e1e1e
-    style FX fill:#8ce99a,color:#1e1e1e
-    style CR fill:#96f2d7,color:#1e1e1e
-    style DN fill:#8ce99a,color:#1e1e1e
+    classDef red fill:#ffa8a8
+    classDef purple fill:#b197fc
+    classDef green fill:#8ce99a
+    classDef teal fill:#96f2d7
+
+    class LO red
+    class HY purple
+    class FX green
+    class CR teal
+    class DN green
 ```
 
 `/diagnosing-bugs` runs the 6-phase loop. Phase 1 builds a tight repro (V4 Flash, iterate cheap). Phase 2 minimizes it. Phase 3 generates ranked hypotheses (K2.7 Code for reasoning). Phase 4 instruments. Phase 5 writes the fix and regression test (V4 Pro for correctness). Phase 6 cleans up debug tags and commits. Review with `/code-review`.
@@ -85,12 +101,18 @@ graph LR
     IM --> CR[/code-review<br/>V4 Flash]
     CR --> DN[Done]
 
-    style AS fill:#ffd43b,color:#1e1e1e
-    style SP fill:#8ce99a,color:#1e1e1e
-    style TK fill:#74c0fc,color:#1e1e1e
-    style IM fill:#ffc078,color:#1e1e1e
-    style CR fill:#96f2d7,color:#1e1e1e
-    style DN fill:#8ce99a,color:#1e1e1e
+    classDef yellow fill:#ffd43b
+    classDef green fill:#8ce99a
+    classDef blue fill:#74c0fc
+    classDef orange fill:#ffc078
+    classDef teal fill:#96f2d7
+
+    class AS yellow
+    class SP green
+    class TK blue
+    class IM orange
+    class CR teal
+    class DN green
 ```
 
 `/improve-codebase-architecture` scans the codebase for deepening opportunities and generates an HTML report (Qwen3.7 Max for deep reasoning). `/to-spec` formalizes the plan, `/to-tickets` slices into work items. `/implement` with V4 Pro handles large-scale changes (needs 1M context). `/code-review` to confirm.
@@ -102,8 +124,11 @@ graph LR
     PR[/prototype<br/>V4 Flash / MiMo V2.5] --> IT[Iterate<br/>V4 Flash / MiMo V2.5]
     IT -.->|loop| PR
 
-    style PR fill:#ffc078,color:#1e1e1e
-    style IT fill:#b197fc,color:#1e1e1e
+    classDef orange fill:#ffc078
+    classDef purple fill:#b197fc
+
+    class PR orange
+    class IT purple
 ```
 
 `/prototype` generates throwaway code to answer a design question. Pick a branch -- logic prototype (state machine test) or UI prototype (multiple visual variants). Iterate with the same cheap model (V4 Flash or MiMo V2.5) until you have your answer. No spec, no review -- this is learning, not shipping.
