@@ -188,7 +188,8 @@ Everything after charting runs on V4 Flash sub-agents: research tickets, prototy
 
 ---
 
-## Model Reference
+<details>
+<summary><strong>Model Reference</strong> — click to expand pricing table</summary>
 
 Pricing via OpenCode Go. "Req/5h" = estimated requests per 5-hour rolling window.
 
@@ -210,6 +211,8 @@ Pricing via OpenCode Go. "Req/5h" = estimated requests per 5-hour rolling window
 | **Qwen3.7 Plus** | $0.40 | $1.60 | 4,300 | 21,600 | 1M | Strong mid-tier Qwen. Good balance of cost and quality. |
 | **Qwen3.6 Plus** | $0.50 | $3.00 | 3,300 | 16,300 | 256K | Earlier Qwen gen at mid-range pricing. Solid reasoning. |
 | **Hy3** | $0.14 | $0.58 | 4,300 | 21,500 | 128K | Budget model. High throughput at Flash-like input pricing. |
+
+</details>
 
 ---
 
