@@ -38,8 +38,8 @@ graph LR
     IN --> SP[ /to-spec]
     SP --> TK[ /to-tickets]
     TK --> D{Complex?}
-    D -->|Yes| IC[ /implement]
-    D -->|No| IS[ /implement]
+    D -->|Complex| IC[ /implement]
+    D -->|Simple| IS[ /implement]
     IC --> CR[ /code-review]
     IS --> CR
     CR --> DN[Done]
@@ -67,10 +67,10 @@ Start with `/triage` to categorize and route the ask. It runs a small state mach
 ```mermaid
 graph LR
     TR[ /triage] --> IN[ /grill-with-docs]
-    IN --> D{Complex?}
-    D -->|Yes| IM[ /implement]
-    D -->|No| IM
-    IM --> CR[ /code-review]
+    IN --> IM[ /implement]
+    IM --> Q{Pass?}
+    Q -->|Yes| CR[ /code-review]
+    Q -->|No| IM
     CR --> DN[Done]
 
     classDef purple fill:#9775fa,color:#000
@@ -222,8 +222,8 @@ graph LR
     IN --> SP[ /to-spec]
     SP --> TK[ /to-tickets]
     TK --> D{Complex?}
-    D -->|Yes| IC[ /implement]
-    D -->|No| IS[ /implement]
+    D -->|Complex| IC[ /implement]
+    D -->|Simple| IS[ /implement]
     IC --> CR[ /code-review]
     IS --> CR
     CR --> DN[Done]
@@ -263,10 +263,10 @@ graph LR
 ```mermaid
 graph LR
     TR[ /triage] --> IN[ /grill-with-docs]
-    IN --> D{Complex?}
-    D -->|Yes| IM[ /implement]
-    D -->|No| IM
-    IM --> CR[ /code-review]
+    IN --> IM[ /implement]
+    IM --> Q{Pass?}
+    Q -->|Yes| CR[ /code-review]
+    Q -->|No| IM
     CR --> DN[Done]
 
     classDef purple fill:#9775fa,color:#000
