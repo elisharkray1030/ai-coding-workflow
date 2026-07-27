@@ -68,10 +68,9 @@ Start with `/triage` to categorize and route the ask. It runs a small state mach
 graph LR
     TR[ /triage] --> IN[ /grill-with-docs]
     IN --> D{Complex?}
-    D -->|Yes| IC[ /implement]
-    D -->|No| IS[ /implement]
-    IC --> CR[ /code-review]
-    IS --> CR
+    D -->|Yes| IM[ /implement]
+    D -->|No| IM
+    IM --> CR[ /code-review]
     CR --> DN[Done]
 
     classDef purple fill:#9775fa,color:#000
@@ -81,8 +80,7 @@ graph LR
     classDef teal fill:#63e6be,color:#000
 
     class TR,IN purple
-    class IS blue
-    class IC orange
+    class IM orange
     class CR teal
     class DN green
 ```
@@ -266,10 +264,9 @@ graph LR
 graph LR
     TR[ /triage] --> IN[ /grill-with-docs]
     IN --> D{Complex?}
-    D -->|Yes| IC[ /implement]
-    D -->|No| IS[ /implement]
-    IC --> CR[ /code-review]
-    IS --> CR
+    D -->|Yes| IM[ /implement]
+    D -->|No| IM
+    IM --> CR[ /code-review]
     CR --> DN[Done]
 
     classDef purple fill:#9775fa,color:#000
@@ -279,8 +276,7 @@ graph LR
     classDef teal fill:#63e6be,color:#000
 
     class TR,IN purple
-    class IS blue
-    class IC orange
+    class IM orange
     class CR teal
     class DN green
 ```
