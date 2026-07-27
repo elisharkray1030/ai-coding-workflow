@@ -116,7 +116,7 @@ graph LR
 
 ```mermaid
 graph LR
-    AS[ /arch-scan] --> SP[ /to-spec]
+    AS[ /improve-codebase-architecture] --> SP[ /to-spec]
     SP --> TK[ /to-tickets]
     TK --> IM[ /implement]
     IM --> CR[ /code-review]
@@ -195,6 +195,14 @@ Pricing via OpenCode Go. "Req/5h" = estimated requests per 5-hour rolling window
 | **DeepSeek V4 Flash** | $0.14 | $0.28 | **31,650** | 158,150 | 1M | **Default workhorse.** 79% SWE-bench Verified. Cheap. Fast. |
 | **MiMo V2.5** | $0.14 | $0.28 | 30,100 | 150,400 | 1M | Budget workhorse. Same price as Flash, 1M context. |
 | **MiniMax M2.7** | $0.30 | $1.20 | 3,400 | 17,000 | 205K | Strong cost-per-benchmark-point (78% SWE-bench Verified at $0.30). |
+| **Grok 4.5** | $2.00 | $6.00 | 120 | 600 | 1M | xAI's latest. Fast reasoning, large context. |
+| **GLM-5.2** | $1.40 | $4.40 | 880 | 4,300 | 1M | Zhipu flagship. Strong bilingual coding (CN/EN). |
+| **GLM-5.1** | $1.40 | $4.40 | 880 | 4,300 | 128K | Solid all-rounder from Zhipu. |
+| **Kimi K3** | $3.00 | $15.00 | 110 | 490 | 128K | Moonshot's coding specialist. High output cost — use sparingly. |
+| **MiMo V2.5 Pro** | $0.435 | $0.87 | 3,250 | 16,300 | 1M | Upgraded MiMo. Same price tier as V4 Pro, lower request cap. |
+| **MiniMax M3** | $0.30 | $1.20 | 3,200 | 16,000 | 1M | MiniMax's latest. Improved over M2.7 at same price. |
+| **Qwen3.7 Plus** | $0.40 | $1.60 | 4,300 | 21,600 | 1M | Strong mid-tier Qwen. Good balance of cost and quality. |
+| **Hy3** | $0.14 | $0.58 | 4,300 | 21,500 | 128K | Budget model. High throughput at Flash-like input pricing. |
 
 ---
 
@@ -321,7 +329,7 @@ Matt Pocock's `/diagnosing-bugs` is a 6-phase discipline. **Phase 1 is where the
 
 ```mermaid
 graph LR
-    AS[ /arch-scan] --> SP[ /to-spec]
+    AS[ /improve-codebase-architecture] --> SP[ /to-spec]
     SP --> TK[ /to-tickets]
     TK --> IM[ /implement]
     IM --> CR[ /code-review]
