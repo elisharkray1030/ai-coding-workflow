@@ -259,7 +259,7 @@ graph LR
 Matt Pocock's `/diagnosing-bugs` is a 6-phase discipline. **Phase 1 is where the real work happens** -- build a tight red/green feedback loop before you do anything else.
 
 | Phase | Steps | Agent | Model | Why |
-|---|---|---|---|---|---|
+|---|---|---|---|---|
 | **Ph 1: Feedback loop** | Build harness, test, curl, script, etc. | **Build** | **V4 Flash** | Mechanical work -- write code to catch the bug. You'll iterate a lot, so cost adds up. |
 | **Ph 2: Reproduce+minimise** | Run the loop, shrink to minimal repro. | **Build** | **V4 Flash** | Lots of iterations. Flash is fast and cheap. |
 | **Ph 3: Hypothesise** | Generate 3-5 ranked falsifiable hypotheses. | Plan | **K2.7 Code** (or K2.6 for hard bugs) | Needs reasoning about causality. Show the ranked list to the user before testing. |
