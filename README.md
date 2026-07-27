@@ -529,4 +529,4 @@ The buffer is now large enough ($40-50/month) that even heavy months with multip
 
 ## Learning & Iteration
 
-This workflow will change. New models arrive on Go, skills evolve, and you'll find what works for you. Keep updating this doc and track the changes in git — the history of what changed and why matters more than the current state.
+This is for me to document my workflow plan so things will change over time~. Models on Go... tools I have access too.. local models??! nre models??! subscriptions??!. 
