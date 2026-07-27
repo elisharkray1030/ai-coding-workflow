@@ -28,7 +28,8 @@ The savings are dramatic: ~$0.04 for a simple feature vs ~$0.42 with the old mod
 
 ---
 
-## Pipeline Diagrams
+<details>
+<summary><strong>Pipeline Diagrams</strong> — click to expand</summary>
 
 ### 1. NEW PROJECT (from scratch)
 
@@ -185,6 +186,8 @@ For projects too big for one agent session. Creates a **map** of decision ticket
 - **Done** — the map is complete when the way is clear: no decisions left to make before someone can go build the thing. The output is a handoff (spec, decision log, or change made in place), not a delivery.
 
 Everything after charting runs on V4 Flash sub-agents: research tickets, prototype tickets, grilling tickets, task tickets. Only a map re-chart (when the destination shifts or the frontier reveals the initial map was wrong) goes back to Qwen3.7 Max.
+
+</details>
 
 ---
 
