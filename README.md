@@ -5,7 +5,98 @@ Inspired by **Matt Pocock's** skills — real engineering, not vibe coding.
 Uses **OpenCode Go** subscription ($5 first mo → $10/mo, $60/mo usage cap).
 All skills from [`mattpocock/skills`](https://github.com/mattpocock/skills).
 
-A visual pipeline diagram is at `pipeline.excalidraw` — drag it onto [excalidraw.com](https://excalidraw.com) to view.
+---
+
+## Pipeline Diagrams
+
+### 1. NEW PROJECT (from scratch)
+
+```mermaid
+graph LR
+    TR[Triage<br/>K2.7 Code] --> IN[Interview<br/>K2.7 Code]
+    IN --> SP[Spec<br/>Qwen3.7 Max]
+    SP --> TK[Tickets<br/>V4 Flash]
+    TK --> D{Complex?}
+    D -->|Yes| IC[Implement<br/>V4 Pro / K2.6]
+    D -->|No| IS[Implement<br/>V4 Flash]
+    IC --> CR[Code Review<br/>V4 Flash]
+    IS --> CR
+    CR --> DN[Done]
+
+    style TR fill:#d0bfff
+    style IN fill:#d0bfff
+    style SP fill:#b2f2bb
+    style TK fill:#a5d8ff
+    style IC fill:#ffd8a8
+    style IS fill:#a5d8ff
+    style CR fill:#c3fae8
+    style DN fill:#b2f2bb
+```
+
+### 2. ADDING A FEATURE
+
+```mermaid
+graph LR
+    TR[Triage<br/>K2.7 Code] --> IN[Interview<br/>K2.7 Code]
+    IN --> D{Complex?}
+    D -->|Yes| IC[Implement<br/>V4 Pro]
+    D -->|No| IS[Implement<br/>V4 Flash]
+    IC --> CR[Code Review<br/>V4 Flash]
+    IS --> CR
+    CR --> DN[Done]
+
+    style TR fill:#d0bfff
+    style IN fill:#d0bfff
+    style IC fill:#ffd8a8
+    style IS fill:#a5d8ff
+    style CR fill:#c3fae8
+    style DN fill:#b2f2bb
+```
+
+### 3. BUG FIX
+
+```mermaid
+graph LR
+    LO[Build Loop<br/>Ph1-2: V4 Flash] --> HY[Hypothesize<br/>Ph3: K2.7 Code]
+    HY --> FX[Fix + Regr.<br/>Ph5-6: V4 Pro]
+    FX --> CR[Code Review<br/>V4 Flash]
+    CR --> DN[Done]
+
+    style LO fill:#ffc9c9
+    style HY fill:#d0bfff
+    style FX fill:#b2f2bb
+    style CR fill:#c3fae8
+    style DN fill:#b2f2bb
+```
+
+### 4. ARCHITECTURE REDESIGN
+
+```mermaid
+graph LR
+    AS[Arch Scan<br/>Qwen3.7 Max] --> SP[Spec<br/>Qwen3.7 Max]
+    SP --> TK[Tickets<br/>V4 Flash]
+    TK --> IM[Implement<br/>V4 Pro]
+    IM --> CR[Code Review<br/>V4 Flash]
+    CR --> DN[Done]
+
+    style AS fill:#fff3bf
+    style SP fill:#b2f2bb
+    style TK fill:#a5d8ff
+    style IM fill:#ffd8a8
+    style CR fill:#c3fae8
+    style DN fill:#b2f2bb
+```
+
+### 5. PROTOTYPE / SPIKE
+
+```mermaid
+graph LR
+    PR[Prototype<br/>V4 Flash / MiMo V2.5] --> IT[Iterate<br/>V4 Flash / MiMo V2.5]
+    IT -.->|loop| PR
+
+    style PR fill:#ffd8a8
+    style IT fill:#d0bfff
+```
 
 ---
 
