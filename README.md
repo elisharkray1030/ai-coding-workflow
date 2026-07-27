@@ -23,13 +23,13 @@ graph LR
     IS --> CR
     CR --> DN[Done]
 
-    classDef purple fill:#9775fa
-    classDef green fill:#69db7c
-    classDef blue fill:#4dabf7
-    classDef orange fill:#ffa94d
-    classDef teal fill:#63e6be
-    classDef yellow fill:#fcc419
-    classDef red fill:#ff8787
+    classDef purple fill:#9775fa,color:#000
+    classDef green fill:#69db7c,color:#000
+    classDef blue fill:#4dabf7,color:#000
+    classDef orange fill:#ffa94d,color:#000
+    classDef teal fill:#63e6be,color:#000
+    classDef yellow fill:#fcc419,color:#000
+    classDef red fill:#ff8787,color:#000
 
     class TR,IN purple
     class SP green
@@ -53,11 +53,11 @@ graph LR
     IS --> CR
     CR --> DN[Done]
 
-    classDef purple fill:#9775fa
-    classDef green fill:#69db7c
-    classDef blue fill:#4dabf7
-    classDef orange fill:#ffa94d
-    classDef teal fill:#63e6be
+    classDef purple fill:#9775fa,color:#000
+    classDef green fill:#69db7c,color:#000
+    classDef blue fill:#4dabf7,color:#000
+    classDef orange fill:#ffa94d,color:#000
+    classDef teal fill:#63e6be,color:#000
 
     class TR,IN purple
     class IS blue
@@ -77,10 +77,10 @@ graph LR
     FX --> CR[/code-review<br/>V4 Flash/]
     CR --> DN[Done]
 
-    classDef red fill:#ff8787
-    classDef purple fill:#9775fa
-    classDef green fill:#69db7c
-    classDef teal fill:#63e6be
+    classDef red fill:#ff8787,color:#000
+    classDef purple fill:#9775fa,color:#000
+    classDef green fill:#69db7c,color:#000
+    classDef teal fill:#63e6be,color:#000
 
     class LO red
     class HY purple
@@ -101,11 +101,11 @@ graph LR
     IM --> CR[/code-review<br/>V4 Flash/]
     CR --> DN[Done]
 
-    classDef yellow fill:#fcc419
-    classDef green fill:#69db7c
-    classDef blue fill:#4dabf7
-    classDef orange fill:#ffa94d
-    classDef teal fill:#63e6be
+    classDef yellow fill:#fcc419,color:#000
+    classDef green fill:#69db7c,color:#000
+    classDef blue fill:#4dabf7,color:#000
+    classDef orange fill:#ffa94d,color:#000
+    classDef teal fill:#63e6be,color:#000
 
     class AS yellow
     class SP green
@@ -124,8 +124,8 @@ graph LR
     PR[/prototype<br/>V4 Flash / MiMo V2.5/] --> IT[Iterate<br/>V4 Flash / MiMo V2.5]
     IT -.->|loop| PR
 
-    classDef orange fill:#ffa94d
-    classDef purple fill:#9775fa
+    classDef orange fill:#ffa94d,color:#000
+    classDef purple fill:#9775fa,color:#000
 
     class PR orange
     class IT purple
