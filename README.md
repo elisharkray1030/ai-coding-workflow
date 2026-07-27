@@ -1,6 +1,6 @@
 # AI Coding Workflow
 
-Inspired by **Matt Pocock's** skills -- real engineering, not vibe coding.
+Inspired by **Matt Pocock's** skills -- AI Engineering/ Coding??? lol.
 
 Uses **OpenCode Go**.
 All skills from [`mattpocock/skills`](https://github.com/mattpocock/skills).
@@ -478,16 +478,6 @@ They report independently. A change can pass one axis and fail the other.
 
 Phase 1 is the critical step: build a tight red/green signal before anything else. A 2-second deterministic loop changes everything. A 30-second flaky loop is barely useful.
 
-### Diagram Generation (Documentation Pipeline)
-
-When documenting a feature or spec, add Mermaid diagrams alongside the text. The README in this repo shows the format: ` ```mermaid ` blocks with `graph LR` or `graph TD`, color-coded nodes, and branching decisions.
-
-**Where diagrams add value:**
-- Pipeline flows (which stage, which model, when to branch) -- as shown above
-- Architecture: module relationships, data flow, component hierarchy
-- State machines in specs / ADRs -- `/domain-modeling` produces CONTEXT.md, diagrams make it visual
-
-**Model for diagram generation:** V4 Flash. It's cheap and Mermaid syntax is simple. Don't waste a reasoning model on layout.
 
 ---
 
