@@ -519,4 +519,4 @@ The buffer is now large enough ($40-50/month) that even heavy months with multip
 
 ## Learning & Iteration
 
-This is for me to document my workflow plan so things will change over time~. Models on Go... tools I have access too.. local models??! nre models??! subscriptions??!. 
+This is for me to document my workflow plan so things will change over time~. Models on Go... tools I have access too.. local models??! new models??! subscriptions??!. 
