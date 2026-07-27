@@ -1,8 +1,8 @@
 # AI Coding Workflow
 
-Inspired by **Matt Pocock's** skills — real engineering, not vibe coding.
+Inspired by **Matt Pocock's** skills -- real engineering, not vibe coding.
 
-Uses **OpenCode Go** subscription ($5 first mo → $10/mo, $60/mo usage cap).
+Uses **OpenCode Go** ($5 first month, $10/month after, $60 usage cap).
 All skills from [`mattpocock/skills`](https://github.com/mattpocock/skills).
 
 ---
@@ -23,14 +23,14 @@ graph LR
     IS --> CR
     CR --> DN[Done]
 
-    style TR fill:#d0bfff
-    style IN fill:#d0bfff
-    style SP fill:#b2f2bb
-    style TK fill:#a5d8ff
-    style IC fill:#ffd8a8
-    style IS fill:#a5d8ff
-    style CR fill:#c3fae8
-    style DN fill:#b2f2bb
+    style TR fill:#b197fc,color:#1e1e1e
+    style IN fill:#b197fc,color:#1e1e1e
+    style SP fill:#8ce99a,color:#1e1e1e
+    style TK fill:#74c0fc,color:#1e1e1e
+    style IC fill:#ffc078,color:#1e1e1e
+    style IS fill:#74c0fc,color:#1e1e1e
+    style CR fill:#96f2d7,color:#1e1e1e
+    style DN fill:#8ce99a,color:#1e1e1e
 ```
 
 ### 2. ADDING A FEATURE
@@ -45,12 +45,12 @@ graph LR
     IS --> CR
     CR --> DN[Done]
 
-    style TR fill:#d0bfff
-    style IN fill:#d0bfff
-    style IC fill:#ffd8a8
-    style IS fill:#a5d8ff
-    style CR fill:#c3fae8
-    style DN fill:#b2f2bb
+    style TR fill:#b197fc,color:#1e1e1e
+    style IN fill:#b197fc,color:#1e1e1e
+    style IC fill:#ffc078,color:#1e1e1e
+    style IS fill:#74c0fc,color:#1e1e1e
+    style CR fill:#96f2d7,color:#1e1e1e
+    style DN fill:#8ce99a,color:#1e1e1e
 ```
 
 ### 3. BUG FIX
@@ -62,11 +62,11 @@ graph LR
     FX --> CR[Code Review<br/>V4 Flash]
     CR --> DN[Done]
 
-    style LO fill:#ffc9c9
-    style HY fill:#d0bfff
-    style FX fill:#b2f2bb
-    style CR fill:#c3fae8
-    style DN fill:#b2f2bb
+    style LO fill:#ffa8a8,color:#1e1e1e
+    style HY fill:#b197fc,color:#1e1e1e
+    style FX fill:#8ce99a,color:#1e1e1e
+    style CR fill:#96f2d7,color:#1e1e1e
+    style DN fill:#8ce99a,color:#1e1e1e
 ```
 
 ### 4. ARCHITECTURE REDESIGN
@@ -79,12 +79,12 @@ graph LR
     IM --> CR[Code Review<br/>V4 Flash]
     CR --> DN[Done]
 
-    style AS fill:#fff3bf
-    style SP fill:#b2f2bb
-    style TK fill:#a5d8ff
-    style IM fill:#ffd8a8
-    style CR fill:#c3fae8
-    style DN fill:#b2f2bb
+    style AS fill:#ffd43b,color:#1e1e1e
+    style SP fill:#8ce99a,color:#1e1e1e
+    style TK fill:#74c0fc,color:#1e1e1e
+    style IM fill:#ffc078,color:#1e1e1e
+    style CR fill:#96f2d7,color:#1e1e1e
+    style DN fill:#8ce99a,color:#1e1e1e
 ```
 
 ### 5. PROTOTYPE / SPIKE
@@ -94,8 +94,8 @@ graph LR
     PR[Prototype<br/>V4 Flash / MiMo V2.5] --> IT[Iterate<br/>V4 Flash / MiMo V2.5]
     IT -.->|loop| PR
 
-    style PR fill:#ffd8a8
-    style IT fill:#d0bfff
+    style PR fill:#ffc078,color:#1e1e1e
+    style IT fill:#b197fc,color:#1e1e1e
 ```
 
 ---
@@ -106,10 +106,10 @@ Pricing via OpenCode Go. "Req/5h" = estimated requests per 5-hour rolling window
 
 | Model | Input $/1M | Output $/1M | Req/5h | Req/mo | Context | Key Strength |
 |---|---|---|---|---|---|---|
-| **Qwen3.7 Max** | $2.50 | $7.50 | 950 | 4,770 | 1M | Highest SWE-bench Pro in Go (60.6%). Best for hard planning. |
-| **DeepSeek V4 Pro** | bundled | bundled | 3,450 | 17,150 | 1M | LiveCodeBench 93.5%, Codeforces 3206. Best for implementation. |
-| **Kimi K2.6** | $0.95 | $4.00 | 1,150 | 5,750 | 256K | Agent Swarm (300 sub-agents). Best for agentic coding. |
-| **Kimi K2.7 Code** | $0.95 | $4.00 | 1,350 | 6,750 | 256K | Coding-focused. More req than K2.6. Great mid-tier planner. |
+| **Qwen3.7 Max** | $2.50 | $7.50 | 950 | 4,770 | 1M | Highest SWE-bench Pro on Go (60.6%). Best for hard planning. |
+| **DeepSeek V4 Pro** | bundled | bundled | 3,450 | 17,150 | 1M | LiveCodeBench 93.5%, Codeforces 3206. Strongest for implementation. |
+| **Kimi K2.6** | $0.95 | $4.00 | 1,150 | 5,750 | 256K | Agent Swarm (300 sub-agents). Best for agentic multi-file changes. |
+| **Kimi K2.7 Code** | $0.95 | $4.00 | 1,350 | 6,750 | 256K | Coding-focused model. More requests than K2.6. Solid mid-tier planner. |
 | **DeepSeek V4 Flash** | $0.14 | $0.28 | **31,650** | 158,150 | 1M | Default workhorse. 79% SWE-bench Verified. Cheap. Fast. |
 | **MiMo V2.5** | $0.14 | $0.28 | 30,100 | 150,400 | 1M | Budget workhorse. Same price as Flash, 1M context. |
 | **MiniMax M2.5** | $0.30 | $1.20 | 6,300 | 31,500 | 205K | Best cost-per-benchmark-point (80.2% at $0.30). |
@@ -134,11 +134,11 @@ Pricing via OpenCode Go. "Req/5h" = estimated requests per 5-hour rolling window
 |---|---|---|---|---|---|---|
 | **Triage** | `/triage` | Plan | **K2.7 Code** | Categorizing, reading issues. Needs instruction-following, not max reasoning. | 1-2 | ~$0.06 |
 | **Interview** | `/grill-with-docs` | Plan | **K2.7 Code** | Research-heavy: read docs, ask questions, explore codebase, build CONTEXT.md. No code written. | 3-8 | ~$0.25 |
-| **Spec** | `/to-spec` | Plan | **Qwen3.7 Max** | Synthesize everything into formal spec. Needs best reasoning — 60.6% SWE-bench Pro. | 1-2 | ~$0.08 |
-| **Tickets** | `/to-tickets` | Plan | **V4 Flash** | Break into tracer-bullet vertical slices with blocking edges. Mechanical. | 3-5 | ~$0.01 |
-| **Implement** (simple) | `/implement` | **Build** | **V4 Flash** | Single-file, straightforward logic. Flash is 79% SWE-bench Verified. | 5-10 | ~$0.01 |
+| **Spec** | `/to-spec` | Plan | **Qwen3.7 Max** | Pulls everything from the interview into a formal spec. You want the best reasoning here — 60.6% SWE-bench Pro. | 1-2 | ~$0.08 |
+| **Tickets** | `/to-tickets` | Plan | **V4 Flash** | Break into vertical slices with blocking edges. Mostly mechanical. | 3-5 | ~$0.01 |
+| **Implement** (simple) | `/implement` | **Build** | **V4 Flash** | Single file, straightforward logic. Flash hits 79% SWE-bench Verified. | 5-10 | ~$0.01 |
 | **Implement** (complex) | `/implement` | **Build** | **V4 Pro** or **K2.6** | Multi-file, 1M context, complex logic. V4 Pro: LiveCodeBench 93.5%. K2.6: Agent Swarm. | 5-15 | ~$0.26 |
-| **Code Review** | `/code-review` | Plan | **V4 Flash** | Read diffs, check standards/spec. Never waste expensive model here. | 2-4 | ~$0.01 |
+| **Code Review** | `/code-review` | Plan | **V4 Flash** | Read diffs, check standards and spec. No need to burn an expensive model here. | 2-4 | ~$0.01 |
 
 **Total per feature:** ~20-40 requests, **~$0.70** of your $60 monthly budget.
 
@@ -156,10 +156,10 @@ Pricing via OpenCode Go. "Req/5h" = estimated requests per 5-hour rolling window
 | Stage | Command | Agent | Model | Why |
 |---|---|---|---|---|
 | **Triage** | `/triage` | Plan | **K2.7 Code** | Quick categorization. |
-| **Interview** | `/grill-with-docs` | Plan | **K2.7 Code** | Research existing codebase + what needs to change. |
-| **Implement** (simple) | `/implement` | **Build** | **V4 Flash** | Straightforward feature, single file. |
+| **Interview** | `/grill-with-docs` | Plan | **K2.7 Code** | Research existing codebase and what needs to change. |
+| **Implement** (simple) | `/implement` | **Build** | **V4 Flash** | Single file, straightforward feature. |
 | **Implement** (complex) | `/implement` | **Build** | **V4 Pro** | Multi-file, complex logic. Escalate if Flash struggles. |
-| **Code Review** | `/code-review` | Plan | **V4 Flash** | Cheap review pass. |
+| **Code Review** | `/code-review` | Plan | **V4 Flash** | Review pass. Flash handles this fine. |
 
 ---
 
@@ -172,15 +172,15 @@ Pricing via OpenCode Go. "Req/5h" = estimated requests per 5-hour rolling window
  /diagnosing-bugs                                       /implement         /code-review
 ```
 
-Matt Pocock's `/diagnosing-bugs` is a 6-phase discipline. **Phase 1 is the most important** — build a tight red/green feedback loop before anything else.
+Matt Pocock's `/diagnosing-bugs` is a 6-phase discipline. **Phase 1 is where the real work happens** -- build a tight red/green feedback loop before you do anything else.
 
 | Phase | Steps | Agent | Model | Why |
-|---|---|---|---|---|
-| **Ph 1: Feedback loop** | Build harness, test, curl, script, etc. | **Build** | **V4 Flash** | Mechanical — write code to catch the bug. Iterate many times, so cost matters. |
-| **Ph 2: Reproduce+minimise** | Run loop, shrink to minimal repro. | **Build** | **V4 Flash** | Lots of iterations. Flash is fast and cheap. |
-| **Ph 3: Hypothesise** | Generate 3-5 ranked falsifiable hypotheses. | Plan | **K2.7 Code** (or K2.6 for hard bugs) | Requires reasoning about causality. Show ranked list to user before testing. |
+|---|---|---|---|---|---|
+| **Ph 1: Feedback loop** | Build harness, test, curl, script, etc. | **Build** | **V4 Flash** | Mechanical work -- write code to catch the bug. You'll iterate a lot, so cost adds up. |
+| **Ph 2: Reproduce+minimise** | Run the loop, shrink to minimal repro. | **Build** | **V4 Flash** | Lots of iterations. Flash is fast and cheap. |
+| **Ph 3: Hypothesise** | Generate 3-5 ranked falsifiable hypotheses. | Plan | **K2.7 Code** (or K2.6 for hard bugs) | Needs reasoning about causality. Show the ranked list to the user before testing. |
 | **Ph 4: Instrument** | Change one variable at a time. Tag every debug log. | Plan | **V4 Flash** | Running probes, testing predictions. High volume. |
-| **Ph 5: Fix + regr. test** | Write regression test before fix. Watch fail→fix→pass. | **Build** | **V4 Pro** | The fix itself. Use Pro for correctness. |
+| **Ph 5: Fix + regr. test** | Write regression test before fix. Watch fail→fix→pass. | **Build** | **V4 Pro** | The actual fix. Use Pro for correctness. |
 | **Ph 6: Cleanup** | Remove debug tags, commit, post-mortem. | **Build** | **V4 Flash** | Mechanical cleanup. |
 
 ---
@@ -197,11 +197,11 @@ Matt Pocock's `/diagnosing-bugs` is a 6-phase discipline. **Phase 1 is the most 
 
 | Stage | Command | Agent | Model | Why |
 |---|---|---|---|---|
-| **Architecture scan** | `/improve-codebase-architecture` | Plan | **Qwen3.7 Max** | Produces HTML report of deepening opportunities. Needs max reasoning (60.6% SWE-bench Pro, 69.7% Terminal-Bench). |
+| **Architecture scan** | `/improve-codebase-architecture` | Plan | **Qwen3.7 Max** | Produces an HTML report of deepening opportunities. Needs the best reasoning (60.6% SWE-bench Pro, 69.7% Terminal-Bench). |
 | **Spec** | `/to-spec` | Plan | **Qwen3.7 Max** | Same session, same reasoning requirements. |
 | **Tickets** | `/to-tickets` | Plan | **V4 Flash** | Breaking into tickets is mechanical. |
 | **Implement** | `/implement` | **Build** | **V4 Pro** | Large-scale changes need 1M context. |
-| **Code Review** | `/code-review` | Plan | **V4 Flash** | Cheap review. |
+| **Code Review** | `/code-review` | Plan | **V4 Flash** | Review pass. Flash handles this fine. |
 
 ---
 
@@ -214,7 +214,7 @@ Matt Pocock's `/diagnosing-bugs` is a 6-phase discipline. **Phase 1 is the most 
  /prototype
 ```
 
-Throwaway code to answer a question. Speed > quality. Never use expensive models.
+Throwaway code that answers a question. Speed over quality. Don't burn expensive models here.
 
 | Stage | Command | Agent | Model | Why |
 |---|---|---|---|---|
@@ -237,7 +237,7 @@ For projects too big for one agent session. Creates a **map** of decision ticket
 
 | Stage | Command | Agent | Model | Why |
 |---|---|---|---|---|
-| **Chart the map** | `/wayfinder` | Plan | **Qwen3.7 Max** | Name destination, surface fog, create initial tickets. Needs max reasoning. |
+| **Chart the map** | `/wayfinder` | Plan | **Qwen3.7 Max** | Name the destination, surface fog, create the initial tickets. Needs max reasoning. |
 | **Research tickets** | (auto subagent) | Subagent | **V4 Flash** | Read docs, investigate APIs. High volume, cheap. |
 | **Prototype tickets** | `/prototype` | **Build** | **V4 Flash** | Throwaway code to answer design questions. |
 | **Grilling tickets** | `/grill-with-docs` | Plan | **K2.7 Code** | Conversation to sharpen decisions one at a time. |
@@ -262,7 +262,7 @@ Matt's skill:
 
 ### `/to-spec` — From Conversation to Spec
 
-Synthesizes what you already discussed — do NOT re-interview. Produces 6 sections:
+Synthesizes what you already discussed -- don't re-interview. Produces 6 sections:
 
 1. **Problem Statement** — user's perspective
 2. **Solution** — user's perspective
@@ -281,31 +281,42 @@ Each ticket is a **tracer bullet** — vertical slice through every layer:
 
 ### `/implement` — Writing Code
 
-- Uses `/tdd` (test-driven development) at pre-agreed seams
-- Runs typechecking regularly
-- Runs single test files regularly
-- Runs full test suite at end
-- Auto-runs `/code-review` at the end
+- Runs tests via `/tdd` at pre-agreed seams
+- Typechecking as you go
+- Single test files as you go
+- Full test suite at the end
+- Auto-runs `/code-review` when done
 - Commits to current branch
 
-### `/code-review` — Two-Axis Review
+### `/code-review` -- Two-Axis Review
 
 ```
 /code-review review since main
 ```
 
 Runs **two parallel sub-agents**:
-- **Standards** — does code follow documented standards + Fowler code smells?
-- **Spec** — does code match what the issue/spec asked for?
+- **Standards** -- does the code follow documented standards and avoid Fowler code smells?
+- **Spec** -- does the code match what the issue asked for?
 
-Reports independently — a change can pass one axis and fail the other.
+They report independently. A change can pass one axis and fail the other.
 
-### `/diagnosing-bugs` — 6 Phases
+### `/diagnosing-bugs` -- 6 Phases
 
-| If someone says "it doesn't work" | Do NOT jump to hypothesizing |
+| If someone says "it doesn't work" | Don't jump to hypothesizing |
 |----------------------------------|------------------------------|
 
-Phase 1 is the critical skill: build a tight red/green signal before anything else. A 2-second deterministic loop is a superpower. A 30-second flaky loop is barely useful.
+Phase 1 is the critical step: build a tight red/green signal before anything else. A 2-second deterministic loop changes everything. A 30-second flaky loop is barely useful.
+
+### Diagram Generation (Documentation Pipeline)
+
+When documenting a feature or spec, add Mermaid diagrams alongside the text. The README in this repo shows the format: ` ```mermaid ` blocks with `graph LR` or `graph TD`, color-coded nodes, and branching decisions.
+
+**Where diagrams add value:**
+- Pipeline flows (which stage, which model, when to branch) -- as shown above
+- Architecture: module relationships, data flow, component hierarchy
+- State machines in specs / ADRs -- `/domain-modeling` produces CONTEXT.md, diagrams make it visual
+
+**Model for diagram generation:** V4 Flash. It's cheap and Mermaid syntax is simple. Don't waste a reasoning model on layout.
 
 ---
 
@@ -341,4 +352,4 @@ That's **40-120 features per month** if you route correctly.
 
 ## Learning & Iteration
 
-This workflow is living. As new models arrive and skills evolve, update this document.
+This workflow will change. New models arrive on Go, skills evolve, and you'll find what works for you. Keep updating this doc and track the changes in git — the history of what changed and why matters more than the current state.
