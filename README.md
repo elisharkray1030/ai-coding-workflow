@@ -30,16 +30,9 @@ The savings are dramatic: ~$0.04 for a simple feature vs ~$0.42 with the old mod
 
 ## OpenCode Agents
 
-Uses two built-in agents via `opencode run --agent <name>`.
+Uses the **`build`** agent via `opencode run --agent build` for everything. It has full tool access (read, edit, bash, subagents) and can handle every stage — planning docs, writing code, spawning research subagents, everything.
 
-| Agent | Role | Can edit code? | When to use |
-|-------|------|----------------|-------------|
-| **plan** | Thinker | No — plans/notes only | Triage, grill, spec, tickets, architecture scan, wayfinding |
-| **build** | Doer | Yes — full tool access | Implement, debug, code review, TDD, prototype, research |
-
-`plan` spawns subagents for delegated work (`explore` for research, `general` for implementation). `build` has everything directly.
-
-**Rule: `--agent plan` for thinking, `--agent build` for doing.** If a stage needs to write code, use `build`. If it's reading, planning, or asking you questions, use `plan`.
+The **`plan`** agent exists but is too restricted for this skill set: it can't write CONTEXT.md, ADRs, ticket files, or spawn `general` subagents for delegated work. So `build` is the default for all stages.
 
 ---
 
@@ -263,10 +256,10 @@ graph LR
 
 | Stage | Default | Escalation | Agent | Why |
 |-------|---------|------------|-------|-----|
-| **Triage** | V4 Flash | K2.7 Code if misclassifies consistently | plan | Routes through state machine (needs-triage → ready-for-agent/human). Greenfield has no codebase, so it's cheap. |
-| **Interview** | V4 Flash | — | plan | Domain conversation, no codebase research. Flash handles this fine. |
-| **Spec** | V4 Flash | V4 Pro if spec misses architectural nuance | plan | Synthesis of existing conversation. Pure formatting. |
-| **Tickets** | V4 Flash | — | plan | Mechanical breakdown. |
+| **Triage** | V4 Flash | K2.7 Code if misclassifies consistently | build | Routes through state machine (needs-triage → ready-for-agent/human). Greenfield has no codebase, so it's cheap. |
+| **Interview** | V4 Flash | — | build | Domain conversation, no codebase research. Flash handles this fine. |
+| **Spec** | V4 Flash | V4 Pro if spec misses architectural nuance | build | Synthesis of existing conversation. Pure formatting. |
+| **Tickets** | V4 Flash | — | build | Mechanical breakdown. |
 | **Implement (simple)** | V4 Flash | — | build | Single file, straightforward logic. |
 | **Implement (complex)** | V4 Flash first | V4 Pro if implementation fails quality gates | build | Try cheap first. Escalate only when Flash proves insufficient. |
 | **Code Review** | V4 Flash | — | build | Read diffs, check standards. Flash handles this fine. |
@@ -300,8 +293,8 @@ graph LR
 
 | Stage | Default | Escalation | Agent | Why |
 |-------|---------|------------|-------|-----|
-| **Triage** | V4 Flash | K2.7 Code if triage consistently misclassifies | plan | Codebase reading — Flash can do it, but K2.7's coding focus may help for tricky domains. |
-| **Interview** | V4 Flash | K2.7 Code if grill produces shallow CONTEXT.md | plan | Codebase exploration. Start Flash, escalate if shallow. |
+| **Triage** | V4 Flash | K2.7 Code if triage consistently misclassifies | build | Codebase reading — Flash can do it, but K2.7's coding focus may help for tricky domains. |
+| **Interview** | V4 Flash | K2.7 Code if grill produces shallow CONTEXT.md | build | Codebase exploration. Start Flash, escalate if shallow. |
 | **Implement (simple)** | V4 Flash | — | build | Small change in existing patterns. |
 | **Implement (cross-cutting)** | V4 Flash first | V4 Pro if touches 3+ modules | build | Complex needs the 1M context and deeper reasoning. |
 | **Code Review** | V4 Flash | — | build | Review pass. Flash handles this fine. |
@@ -362,9 +355,9 @@ graph LR
 
 | Stage | Model | Agent | Why |
 |-------|-------|-------|-----|
-| **Architecture scan** | **Qwen3.7 Max** (always) | plan | Produces an HTML report of deepening opportunities. Needs the best reasoning (60.6% SWE-bench Pro, 69.7% Terminal-Bench). Non-negotiable. |
-| **Spec** | **V4 Pro** | plan | Synthesis of scan output, not new reasoning. Qwen is overkill here. |
-| **Tickets** | **V4 Flash** | plan | Breaking into tickets is mechanical. |
+| **Architecture scan** | **Qwen3.7 Max** (always) | build | Produces an HTML report of deepening opportunities. Needs the best reasoning (60.6% SWE-bench Pro, 69.7% Terminal-Bench). Non-negotiable. |
+| **Spec** | **V4 Pro** | build | Synthesis of scan output, not new reasoning. Qwen is overkill here. |
+| **Tickets** | **V4 Flash** | build | Breaking into tickets is mechanical. |
 | **Implement** | **V4 Pro** | build | Large-scale changes need 1M context. |
 | **Code Review** | **V4 Flash** | build | Review pass. |
 
@@ -427,12 +420,12 @@ The map is a single issue with: Destination, Notes, Decisions so far, Not yet sp
 
 | Stage | Model | Agent | Why |
 |-------|-------|-------|-----|
-| **Chart the map** | **Qwen3.7 Max** (always) | plan | Name the destination, surface fog, create the initial tickets. Needs max reasoning. Non-negotiable. |
-| **Re-chart** | **Qwen3.7 Max** (only when needed) | plan | Destination shifted or the initial map was wrong. Rare — only when frontier reveals a fundamentally incorrect map. |
-| **Research tickets** | **V4 Flash** | plan | Read docs, investigate APIs. High volume, cheap. |
+| **Chart the map** | **Qwen3.7 Max** (always) | build | Name the destination, surface fog, create the initial tickets. Needs max reasoning. Non-negotiable. |
+| **Re-chart** | **Qwen3.7 Max** (only when needed) | build | Destination shifted or the initial map was wrong. Rare — only when frontier reveals a fundamentally incorrect map. |
+| **Research tickets** | **V4 Flash** | build | Read docs, investigate APIs. High volume, cheap. |
 | **Prototype tickets** | **V4 Flash** | build | Throwaway code to answer design questions. |
-| **Grilling tickets** | **V4 Flash** | plan | Conversation to sharpen decisions one at a time. |
-| **Task tickets** | **V4 Flash** | plan | Mechanical setup work. |
+| **Grilling tickets** | **V4 Flash** | build | Conversation to sharpen decisions one at a time. |
+| **Task tickets** | **V4 Flash** | build | Mechanical setup work. |
 
 **Est. cost:** ~**$0.15-0.30**
 
@@ -533,20 +526,20 @@ Action: bump default for auth-scoped work to V4 Pro
 
 | Task Type | Default | Escalation | Agent | Est. req |
 |-----------|---------|------------|-------|----------|
-| Triage | V4 Flash | K2.7 Code | plan | 1-2 |
-| Codebase research / grill | V4 Flash | K2.7 Code if shallow | plan | 3-8 |
-| Planning / spec (new project) | V4 Flash | V4 Pro | plan | 1-3 |
-| Tickets | V4 Flash | — | plan | 3-5 |
+| Triage | V4 Flash | K2.7 Code | build | 1-2 |
+| Codebase research / grill | V4 Flash | K2.7 Code if shallow | build | 3-8 |
+| Planning / spec (new project) | V4 Flash | V4 Pro | build | 1-3 |
+| Tickets | V4 Flash | — | build | 3-5 |
 | Implementation (simple) | V4 Flash | — | build | 3-8 |
 | Implementation (complex) | V4 Flash first | V4 Pro if fails quality gates | build | 5-15 |
 | Debugging | V4 Flash | V4 Pro if fix fails | build | 10-50 |
-| Architecture scan (light) | Qwen3.7 Max | — | plan | 1-2 |
-| Architecture scan (deep w/ grill loop) | Qwen3.7 Max | — | plan | 3-6 |
+| Architecture scan (light) | Qwen3.7 Max | — | build | 1-2 |
+| Architecture scan (deep w/ grill loop) | Qwen3.7 Max | — | build | 3-6 |
 | Prototype | V4 Flash / MiMo | — | build | 5-20 |
 | Code review | V4 Flash | — | build | 2-4 |
-| Wayfinder (map) | Qwen3.7 Max | — | plan | 1-3 |
-| Wayfinder (re-chart) | Qwen3.7 Max | — | plan | 1-2 |
-| Wayfinder (tickets) | V4 Flash | — | plan | 3-10+ |
+| Wayfinder (map) | Qwen3.7 Max | — | build | 1-3 |
+| Wayfinder (re-chart) | Qwen3.7 Max | — | build | 1-2 |
+| Wayfinder (tickets) | V4 Flash | — | build | 3-10+ |
 
 </details>
 
