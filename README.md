@@ -92,24 +92,19 @@ A lighter pipeline. `/triage` and `/grill-with-docs` research the existing codeb
 
 ```mermaid
 graph LR
-    LO[ /diagnosing-bugs] --> HY[Hypothesize]
-    HY --> FX[Fix + Regr.]
-    FX --> CR[ /code-review]
+    LO[ /diagnosing-bugs] --> CR[ /code-review]
     CR --> DN[Done]
 
     classDef red fill:#ff8787,color:#000
-    classDef purple fill:#9775fa,color:#000
-    classDef green fill:#69db7c,color:#000
     classDef teal fill:#63e6be,color:#000
+    classDef green fill:#69db7c,color:#000
 
     class LO red
-    class HY purple
-    class FX green
     class CR teal
     class DN green
 ```
 
-`/diagnosing-bugs` runs the 6-phase loop. Phase 1 builds a tight repro (V4 Flash, iterate cheap). Phase 2 minimizes it. Phase 3 generates ranked hypotheses — escalate to K2.7 Code if Flash generates 3+ false hypotheses. Phase 4 instruments. Phase 5 writes the fix and regression test — escalate to V4 Pro if the fix keeps failing tests. Phase 6 cleans up debug tags and commits. Review with `/code-review`.
+`/diagnosing-bugs` is a single prompt that drives the entire debug cycle on V4 Flash. If the fix fails quality gates, rerun with V4 Pro. Review with `/code-review`.
 
 ### 4. ARCHITECTURE REDESIGN
 
@@ -300,37 +295,27 @@ graph LR
 
 ---
 
-### 3. BUG FIX (6-phase diagnosis)
+### 3. BUG FIX
 
 ```mermaid
 graph LR
-    LO[ /diagnosing-bugs] --> HY[Hypothesize]
-    HY --> FX[Fix + Regr.]
-    FX --> CR[ /code-review]
+    LO[ /diagnosing-bugs] --> CR[ /code-review]
     CR --> DN[Done]
 
     classDef red fill:#ff8787,color:#000
-    classDef purple fill:#9775fa,color:#000
-    classDef green fill:#69db7c,color:#000
     classDef teal fill:#63e6be,color:#000
+    classDef green fill:#69db7c,color:#000
 
     class LO red
-    class HY purple
-    class FX green
     class CR teal
     class DN green
 ```
 
-Matt Pocock's `/diagnosing-bugs` is a 6-phase discipline. **Phase 1 is where the real work happens** — build a tight red/green feedback loop before you do anything else.
+`/diagnosing-bugs` is a single prompt that drives the entire debug cycle on V4 Flash. If the fix keeps failing tests, rerun with V4 Pro. Review with `/code-review`.
 
-| Phase | Steps | Default | Escalation | Why |
-|-------|-------|---------|------------|-----|
-| **Ph 1: Feedback loop** | Build harness, test, curl, script, etc. | **V4 Flash** | — | Mechanical work — write code to catch the bug. You'll iterate a lot, so keep it cheap. |
-| **Ph 2: Reproduce+minimise** | Run the loop, shrink to minimal repro. | **V4 Flash** | — | Lots of iterations. Flash is fast and cheap. |
-| **Ph 3: Hypothesise** | Generate 3-5 ranked falsifiable hypotheses. | **V4 Flash** | **K2.7 Code** if 3+ false hypotheses in a row | Needs reasoning about causality. Start Flash, escalate if stuck. |
-| **Ph 4: Instrument** | Change one variable at a time. Tag every debug log. | **V4 Flash** | — | High volume of small probes. |
-| **Ph 5: Fix + regr. test** | Write regression test before fix. Watch fail→fix→pass. | **V4 Flash** | **V4 Pro** if fix keeps failing tests | Correctness-critical. V4 Pro for when Flash can't solve it. |
-| **Ph 6: Cleanup** | Remove debug tags, commit, post-mortem. | **V4 Flash** | — | Mechanical cleanup. |
+| Stage | Default | Escalation | Why |
+|-------|---------|------------|-----|
+| **Diagnose & fix** | V4 Flash | V4 Pro if fix fails | Single prompt handles the whole debug cycle. Flash is fast and cheap for iteration. V4 Pro when correctness is critical. |
 
 **Est. cost:** easy ~**$0.05** | hard ~**$0.18**
 
@@ -493,12 +478,16 @@ Runs **two parallel sub-agents**:
 
 They report independently. A change can pass one axis and fail the other.
 
-### `/diagnosing-bugs` -- 6 Phases
+### `/diagnosing-bugs` — Debug Cycle
+
+`/diagnosing-bugs` is a single prompt that drives the entire debug cycle on V4 Flash. It builds a repro, diagnoses the root cause, writes a regression test, and applies the fix in one shot.
+
+If the fix keeps failing tests, rerun with V4 Pro.
 
 | If someone says "it doesn't work" | Don't jump to hypothesizing |
 |----------------------------------|------------------------------|
 
-Phase 1 is the critical step: build a tight red/green signal before anything else. A 2-second deterministic loop changes everything. A 30-second flaky loop is barely useful.
+Build a tight red/green feedback loop before anything else. A 2-second deterministic repro changes everything. A 30-second flaky repro is barely useful.
 
 ---
 
@@ -535,9 +524,7 @@ Action: bump default for auth-scoped work to V4 Pro
 | Tickets | V4 Flash | — | 3-5 |
 | Implementation (simple) | V4 Flash | — | 3-8 |
 | Implementation (complex) | V4 Flash first | V4 Pro if fails quality gates | 5-15 |
-| Debugging (loop) | V4 Flash | — | 10-50 |
-| Debugging (hypothesis) | V4 Flash | K2.7 Code if stuck | 3-5 |
-| Debugging (fix) | V4 Flash | V4 Pro if fix fails tests | 2-5 |
+| Debugging | V4 Flash | V4 Pro if fix fails | 10-50 |
 | Architecture scan (light) | Qwen3.7 Max | — | 1-2 |
 | Architecture scan (deep w/ grill loop) | Qwen3.7 Max | — | 3-6 |
 | Prototype | V4 Flash / MiMo | — | 5-20 |
