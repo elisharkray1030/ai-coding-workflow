@@ -9,20 +9,15 @@ All skills from [`mattpocock/skills`](https://github.com/mattpocock/skills).
 
 ## Routing Philosophy
 
-**V4 Flash is the default for everything.** It scores 79% SWE-bench Verified, has 1M context, costs $0.14/$0.28 per million tokens, and has 31,650 req/5h — effectively unlimited. Start here for every stage of every pipeline.
+**V4 Flash is the default for everything.** It scores 79% SWE-bench Verified, has 1M context, costs $0.14/$0.28 per million tokens, and has 31,650 req/5h — effectively unlimited. Since the 0731 update it handles *every* stage of *every* pipeline — including architecture scans and wayfinding that used to be pinned to pricier models.
 
-**Escalate only when Flash proves insufficient.** Don't pre-assign expensive models to stages based on what the stage *could* need. Wait for a concrete failure, then retry with a stronger model.
+**Escalate only when Flash proves insufficient.** Don't pre-assign expensive models to stages based on what the stage *could* need. Wait for a concrete failure, then rerun the same stage at **max effort** — same model, crank the reasoning effort to max.
 
 | Escalation path | When | Escalate to |
 |----------------|------|-------------|
-| /triage gives wrong category | Rare — Flash handles this fine | K2.7 Code |
-| /grill produces shallow CONTEXT.md | Feature-add to a complex codebase | K2.7 Code |
-| /to-spec misses architectural nuance | Complex greenfield with tricky domain | V4 Pro |
-| /implement produces wrong architecture | Multi-file, cross-cutting change | V4 Pro |
-| /implement keeps breaking constraints | Large-scale redesign | V4 Pro |
-| Bug hypotheses keep being wrong | 3+ false hypotheses in a row | K2.7 Code |
-| Bug fix keeps failing tests | Correctness-critical fix | V4 Pro |
-| Architecture scan or wayfinding | Always needs deep reasoning | Qwen3.7 Max |
+| Any stage produces wrong results | Concrete failure on a real task | Rerun at **max effort** (V4 Flash) |
+
+That's the whole ladder: **V4 Flash, and crank effort to max if it fails.** Not sure what's beyond max effort yet — revisit when new models land on Go.
 
 The savings are dramatic: ~$0.04 for a simple feature vs ~$0.42 with the old model-per-stage routing. You stay safely within the $60/month budget even on heavy months.
 
@@ -46,11 +41,10 @@ graph LR
     TR[ /triage] --> IN[ /grill-with-docs]
     IN --> SP[ /to-spec]
     SP --> TK[ /to-tickets]
-    TK --> D{Complex?}
-    D -->|Complex| IC[ /implement · V4 Pro]
-    D -->|Simple| IS[ /implement · V4 Flash]
-    IC --> CR[ /code-review]
-    IS --> CR
+    TK --> IM[ /implement · V4 Flash]
+    IM --> Q{Pass?}
+    Q -->|Yes| CR[ /code-review]
+    Q -->|No| IM
     CR --> DN[Done]
 
     classDef purple fill:#9775fa,color:#000
@@ -63,13 +57,13 @@ graph LR
 
     class TR,IN purple
     class SP green
-    class TK,IS blue
-    class IC orange
+    class TK blue
+    class IM orange
     class CR teal
     class DN green
 ```
 
-Start with `/triage` to categorize and route the ask. It runs a small state machine: `needs-triage` → `needs-info` (if ambiguous) → `ready-for-agent` or `ready-for-human`. Category labels (`bug`/`enhancement`) are set upfront. For PRs, the same states apply but read against the attached code. `/grill-with-docs` interviews you about the domain, builds CONTEXT.md. `/to-spec` formalizes what was discussed. `/to-tickets` breaks it into vertical-slice tickets with blocking edges. `/implement` writes the code — V4 Flash by default, V4 Pro if the implementation fails quality gates. `/code-review` checks standards and spec compliance.
+Start with `/triage` to categorize and route the ask. It runs a small state machine: `needs-triage` → `needs-info` (if ambiguous) → `ready-for-agent` or `ready-for-human`. Category labels (`bug`/`enhancement`) are set upfront. For PRs, the same states apply but read against the attached code. `/grill-with-docs` interviews you about the domain, builds CONTEXT.md. `/to-spec` formalizes what was discussed. `/to-tickets` breaks it into vertical-slice tickets with blocking edges. `/implement` writes the code — V4 Flash by default, rerun at max effort if it fails quality gates. `/code-review` checks standards and spec compliance.
 
 ### 2. ADDING A FEATURE
 
@@ -94,25 +88,30 @@ graph LR
     class DN green
 ```
 
-A lighter pipeline. `/triage` and `/grill-with-docs` research the existing codebase to understand context. Skip spec and tickets — you're extending what's there, not starting fresh. `/implement` writes the feature on V4 Flash, then `/code-review` checks it. For cross-cutting changes touching 3+ modules, rerun `/implement` on V4 Pro.
+A lighter pipeline. `/triage` and `/grill-with-docs` research the existing codebase to understand context. Skip spec and tickets — you're extending what's there, not starting fresh. `/implement` writes the feature on V4 Flash, then `/code-review` checks it. For cross-cutting changes touching 3+ modules, rerun `/implement` at max effort.
 
 ### 3. BUG FIX
 
 ```mermaid
 graph LR
     LO[ /diagnosing-bugs] --> CR[ /code-review]
-    CR --> DN[Done]
+    CR --> D{Issues?}
+    D -->|No| DN[Done]
+    D -->|Yes| IM[ /implement]
+    IM --> CR
 
     classDef red fill:#ff8787,color:#000
     classDef teal fill:#63e6be,color:#000
     classDef green fill:#69db7c,color:#000
+    classDef orange fill:#ffa94d,color:#000
 
     class LO red
     class CR teal
+    class IM orange
     class DN green
 ```
 
-`/diagnosing-bugs` is a single prompt that drives the entire debug cycle on V4 Flash. If the fix fails quality gates, rerun with V4 Pro. Review with `/code-review`.
+`/diagnosing-bugs` is a single prompt that drives the entire debug cycle on V4 Flash. If the fix fails quality gates, rerun at max effort. Review with `/code-review`, then **discuss any issues it raises** — after that, `/implement` the agreed fixes and loop until clean.
 
 ### 4. ARCHITECTURE REDESIGN
 
@@ -138,7 +137,7 @@ graph LR
     class DN green
 ```
 
-`/improve-codebase-architecture` scans the codebase for deepening opportunities and generates an HTML report — Qwen3.7 Max is always used here because deep reasoning is non-negotiable. `/to-spec` formalizes the plan (V4 Pro — synthesizes scan output, no deep reasoning needed). `/to-tickets` slices into work items. `/implement` with V4 Pro handles large-scale changes (needs 1M context). `/code-review` to confirm.
+`/improve-codebase-architecture` scans the codebase for deepening opportunities and generates an HTML report — V4 Flash by default since the 0731 update (used to be pinned to a pricier model; only crank to max effort if the scan comes back shallow). `/to-spec` formalizes the plan. `/to-tickets` slices into work items. `/implement` on V4 Flash, max effort if the change outgrows it. `/code-review` to confirm.
 
 ### 5. PROTOTYPE / SPIKE
 
@@ -183,12 +182,12 @@ graph LR
 For projects too big for one agent session. Creates a **map** of decision tickets on the issue tracker — not build tickets, but questions whose resolution is a decision that unblocks the path forward.
 
 **How it works:**
-- **Charting** — `/wayfinder` (Qwen3.7 Max always) names the destination, identifies what's known vs fog, and creates the initial tickets. The map is a single issue with: Destination, Notes, Decisions so far, Not yet specified (fog of war), Out of scope.
+- **Charting** — `/wayfinder` (V4 Flash; max effort only if the map comes out wrong) names the destination, identifies what's known vs fog, and creates the initial tickets. The map is a single issue with: Destination, Notes, Decisions so far, Not yet specified (fog of war), Out of scope.
 - **Frontier** — tickets graduate from "fog" (not yet specified) into concrete decision tickets as the frontier advances. Each ticket is sized for one 100K-token agent session.
 - **Resolution** — each ticket is resolved independently by a V4 Flash sub-agent. A ticket closes when its question is answered (not when code is written), producing a decision recorded in the map's "Decisions so far" section.
 - **Done** — the map is complete when the way is clear: no decisions left to make before someone can go build the thing. The output is a handoff (spec, decision log, or change made in place), not a delivery.
 
-Everything after charting runs on V4 Flash sub-agents: research tickets, prototype tickets, grilling tickets, task tickets. Only a map re-chart (when the destination shifts or the frontier reveals the initial map was wrong) goes back to Qwen3.7 Max.
+Everything after charting runs on V4 Flash sub-agents: research tickets, prototype tickets, grilling tickets, task tickets. Only a map re-chart (when the destination shifts or the frontier reveals the initial map was wrong) runs at max effort.
 
 </details>
 
@@ -231,11 +230,10 @@ graph LR
     TR[ /triage] --> IN[ /grill-with-docs]
     IN --> SP[ /to-spec]
     SP --> TK[ /to-tickets]
-    TK --> D{Complex?}
-    D -->|Complex| IC[ /implement · V4 Pro]
-    D -->|Simple| IS[ /implement · V4 Flash]
-    IC --> CR[ /code-review]
-    IS --> CR
+    TK --> IM[ /implement · V4 Flash]
+    IM --> Q{Pass?}
+    Q -->|Yes| CR[ /code-review]
+    Q -->|No| IM
     CR --> DN[Done]
 
     classDef purple fill:#9775fa,color:#000
@@ -248,20 +246,20 @@ graph LR
 
     class TR,IN purple
     class SP green
-    class TK,IS blue
-    class IC orange
+    class TK blue
+    class IM orange
     class CR teal
     class DN green
 ```
 
 | Stage | Default | Escalation | Agent | Why |
 |-------|---------|------------|-------|-----|
-| **Triage** | V4 Flash | K2.7 Code if misclassifies consistently | build | Routes through state machine (needs-triage → ready-for-agent/human). Greenfield has no codebase, so it's cheap. |
+| **Triage** | V4 Flash | Max effort if misclassifies consistently | build | Routes through state machine (needs-triage → ready-for-agent/human). Greenfield has no codebase, so it's cheap. |
 | **Interview** | V4 Flash | — | build | Domain conversation, no codebase research. Flash handles this fine. |
-| **Spec** | V4 Flash | V4 Pro if spec misses architectural nuance | build | Synthesis of existing conversation. Pure formatting. |
+| **Spec** | V4 Flash | Max effort if it misses nuance | build | Synthesis of existing conversation. Pure formatting. |
 | **Tickets** | V4 Flash | — | build | Mechanical breakdown. |
 | **Implement (simple)** | V4 Flash | — | build | Single file, straightforward logic. |
-| **Implement (complex)** | V4 Flash first | V4 Pro if implementation fails quality gates | build | Try cheap first. Escalate only when Flash proves insufficient. |
+| **Implement (complex)** | V4 Flash | Max effort if implementation fails quality gates | build | Try cheap first. Escalate only when Flash proves insufficient. |
 | **Code Review** | V4 Flash | — | build | Read diffs, check standards. Flash handles this fine. |
 
 **Est. cost:** simple ~**$0.04** | complex ~**$0.13**
@@ -293,10 +291,10 @@ graph LR
 
 | Stage | Default | Escalation | Agent | Why |
 |-------|---------|------------|-------|-----|
-| **Triage** | V4 Flash | K2.7 Code if triage consistently misclassifies | build | Codebase reading — Flash can do it, but K2.7's coding focus may help for tricky domains. |
-| **Interview** | V4 Flash | K2.7 Code if grill produces shallow CONTEXT.md | build | Codebase exploration. Start Flash, escalate if shallow. |
+| **Triage** | V4 Flash | Max effort if triage consistently misclassifies | build | Codebase reading — Flash can do it. |
+| **Interview** | V4 Flash | Max effort if grill produces shallow CONTEXT.md | build | Codebase exploration. Start Flash, escalate if shallow. |
 | **Implement (simple)** | V4 Flash | — | build | Small change in existing patterns. |
-| **Implement (cross-cutting)** | V4 Flash first | V4 Pro if touches 3+ modules | build | Complex needs the 1M context and deeper reasoning. |
+| **Implement (cross-cutting)** | V4 Flash | Max effort if it can't hold the scope | build | Complex change. Flash first, max effort if it loses the plot. |
 | **Code Review** | V4 Flash | — | build | Review pass. Flash handles this fine. |
 
 **Est. cost:** simple ~**$0.03** | cross-cutting ~**$0.08**
@@ -308,22 +306,28 @@ graph LR
 ```mermaid
 graph LR
     LO[ /diagnosing-bugs] --> CR[ /code-review]
-    CR --> DN[Done]
+    CR --> D{Issues?}
+    D -->|No| DN[Done]
+    D -->|Yes| IM[ /implement]
+    IM --> CR
 
     classDef red fill:#ff8787,color:#000
     classDef teal fill:#63e6be,color:#000
     classDef green fill:#69db7c,color:#000
+    classDef orange fill:#ffa94d,color:#000
 
     class LO red
     class CR teal
+    class IM orange
     class DN green
 ```
 
-`/diagnosing-bugs` is a single prompt that drives the entire debug cycle on V4 Flash. If the fix keeps failing tests, rerun with V4 Pro. Review with `/code-review`.
+`/diagnosing-bugs` is a single prompt that drives the entire debug cycle on V4 Flash. If the fix keeps failing tests, rerun at max effort. Review with `/code-review`, then **discuss any issues it raises** — after that, `/implement` the agreed fixes and loop until clean.
 
 | Stage | Default | Escalation | Agent | Why |
 |-------|---------|------------|-------|-----|
-| **Diagnose & fix** | V4 Flash | V4 Pro if fix fails | build | Single prompt handles the whole debug cycle. Flash is fast and cheap for iteration. V4 Pro when correctness is critical. |
+| **Diagnose & fix** | V4 Flash | Max effort if fix fails | build | Single prompt handles the whole debug cycle. Flash is fast and cheap for iteration. |
+| **Review → discuss → implement** | V4 Flash | — | build | `/code-review` finds issues → discuss them → `/implement` the agreed fixes → loop until clean. |
 
 **Est. cost:** easy ~**$0.05** | hard ~**$0.18**
 
@@ -353,13 +357,13 @@ graph LR
     class DN green
 ```
 
-| Stage | Model | Agent | Why |
-|-------|-------|-------|-----|
-| **Architecture scan** | **Qwen3.7 Max** (always) | build | Produces an HTML report of deepening opportunities. Needs the best reasoning (60.6% SWE-bench Pro, 69.7% Terminal-Bench). Non-negotiable. |
-| **Spec** | **V4 Pro** | build | Synthesis of scan output, not new reasoning. Qwen is overkill here. |
-| **Tickets** | **V4 Flash** | build | Breaking into tickets is mechanical. |
-| **Implement** | **V4 Pro** | build | Large-scale changes need 1M context. |
-| **Code Review** | **V4 Flash** | build | Review pass. |
+| Stage | Default | Escalation | Agent | Why |
+|-------|---------|------------|-------|-----|
+| **Architecture scan** | V4 Flash | Max effort if scan is shallow | build | Produces an HTML report of deepening opportunities. Flash handles it now (0731 update); crank effort if it misses depth. |
+| **Spec** | V4 Flash | Max effort if it misses nuance | build | Synthesis of scan output, not new reasoning. |
+| **Tickets** | V4 Flash | — | build | Breaking into tickets is mechanical. |
+| **Implement** | V4 Flash | Max effort for large-scale changes | build | Flash first; max effort when the change needs deeper reasoning. |
+| **Code Review** | V4 Flash | — | build | Review pass. |
 
 **Est. cost:** light ~**$0.08** | deep ~**$0.25**
 
@@ -416,16 +420,16 @@ graph LR
 
 For projects too big for one agent session. Creates a **map** of decision tickets on the issue tracker. Not build tickets — questions whose resolution unblocks the path forward.
 
-The map is a single issue with: Destination, Notes, Decisions so far, Not yet specified (fog of war), Out of scope. Tickets graduate from fog → concrete as the frontier advances. Each ticket is sized for one 100K-token agent session and resolved independently. The map is done when the way is clear — no decisions left before someone can go build the thing. Only a re-chart (destination shift or wrong initial map) goes back to Qwen3.7 Max.
+The map is a single issue with: Destination, Notes, Decisions so far, Not yet specified (fog of war), Out of scope. Tickets graduate from fog → concrete as the frontier advances. Each ticket is sized for one 100K-token agent session and resolved independently. The map is done when the way is clear — no decisions left before someone can go build the thing. Only a re-chart (destination shift or wrong initial map) runs at max effort.
 
-| Stage | Model | Agent | Why |
-|-------|-------|-------|-----|
-| **Chart the map** | **Qwen3.7 Max** (always) | build | Name the destination, surface fog, create the initial tickets. Needs max reasoning. Non-negotiable. |
-| **Re-chart** | **Qwen3.7 Max** (only when needed) | build | Destination shifted or the initial map was wrong. Rare — only when frontier reveals a fundamentally incorrect map. |
-| **Research tickets** | **V4 Flash** | build | Read docs, investigate APIs. High volume, cheap. |
-| **Prototype tickets** | **V4 Flash** | build | Throwaway code to answer design questions. |
-| **Grilling tickets** | **V4 Flash** | build | Conversation to sharpen decisions one at a time. |
-| **Task tickets** | **V4 Flash** | build | Mechanical setup work. |
+| Stage | Default | Escalation | Agent | Why |
+|-------|---------|------------|-------|-----|
+| **Chart the map** | V4 Flash | Max effort only if the initial map is wrong | build | Name the destination, surface fog, create the initial tickets. Flash is enough since the 0731 update. |
+| **Re-chart** | V4 Flash | Max effort (rare) | build | Destination shifted or the initial map was wrong. Rare — only when frontier reveals a fundamentally incorrect map. |
+| **Research tickets** | V4 Flash | — | build | Read docs, investigate APIs. High volume, cheap. |
+| **Prototype tickets** | V4 Flash | — | build | Throwaway code to answer design questions. |
+| **Grilling tickets** | V4 Flash | — | build | Conversation to sharpen decisions one at a time. |
+| **Task tickets** | V4 Flash | — | build | Mechanical setup work. |
 
 **Est. cost:** ~**$0.15-0.30**
 
@@ -490,7 +494,7 @@ They report independently. A change can pass one axis and fail the other.
 
 `/diagnosing-bugs` is a single prompt that drives the entire debug cycle on V4 Flash. It builds a repro, diagnoses the root cause, writes a regression test, and applies the fix in one shot.
 
-If the fix keeps failing tests, rerun with V4 Pro.
+Then: `/code-review` → **discuss any issues** → `/implement` the agreed fixes → loop until clean. If the fix keeps failing tests, rerun at max effort.
 
 | If someone says "it doesn't work" | Don't jump to hypothesizing |
 |----------------------------------|------------------------------|
@@ -503,19 +507,20 @@ Build a tight red/green feedback loop before anything else. A 2-second determini
 
 Escalations are data. If a task type keeps requiring escalation, the routing table should evolve.
 
-**Track escalations per task type.** After each project or sprint, note which tasks escalated and to which model:
+**Track escalations per task type.** After each project or sprint, note which tasks escalated and to which effort level:
 
 ```
 Task: cross-cutting feature-add to auth module
-Escalated: /implement → V4 Pro (structural failure)
+Escalated: /implement → max effort (structural failure)
 Pattern: 3rd time in 2 weeks
-Action: bump default for auth-scoped work to V4 Pro
+Action: bump default for auth-scoped work to start at max effort
 ```
 
 **When to update the routing table:**
-- 3+ escalations of the same type in 2 weeks → change the default for that task type
+- 3+ escalations of the same type in 2 weeks → change the default effort for that task type
 - A model you're routing to gets deprecated or replaced → update immediately
 - A new model at Flash prices outperforms Flash on your workload → swap the default
+- A new model makes max effort obsolete → adopt it as the new default
 
 **Keep it live.** This is a workflow doc — stale routing is worse than no routing. If a model gets better or cheaper, the defaults here should follow. The escalation table at the top is the first thing to touch when patterns emerge.
 
@@ -526,19 +531,19 @@ Action: bump default for auth-scoped work to V4 Pro
 
 | Task Type | Default | Escalation | Agent | Est. req |
 |-----------|---------|------------|-------|----------|
-| Triage | V4 Flash | K2.7 Code | build | 1-2 |
-| Codebase research / grill | V4 Flash | K2.7 Code if shallow | build | 3-8 |
-| Planning / spec (new project) | V4 Flash | V4 Pro | build | 1-3 |
+| Triage | V4 Flash | Max effort | build | 1-2 |
+| Codebase research / grill | V4 Flash | Max effort if shallow | build | 3-8 |
+| Planning / spec (new project) | V4 Flash | Max effort | build | 1-3 |
 | Tickets | V4 Flash | — | build | 3-5 |
 | Implementation (simple) | V4 Flash | — | build | 3-8 |
-| Implementation (complex) | V4 Flash first | V4 Pro if fails quality gates | build | 5-15 |
-| Debugging | V4 Flash | V4 Pro if fix fails | build | 10-50 |
-| Architecture scan (light) | Qwen3.7 Max | — | build | 1-2 |
-| Architecture scan (deep w/ grill loop) | Qwen3.7 Max | — | build | 3-6 |
+| Implementation (complex) | V4 Flash | Max effort if fails quality gates | build | 5-15 |
+| Debugging | V4 Flash | Max effort if fix fails | build | 10-50 |
+| Architecture scan (light) | V4 Flash | Max effort if shallow | build | 1-2 |
+| Architecture scan (deep w/ grill loop) | V4 Flash | Max effort if shallow | build | 3-6 |
 | Prototype | V4 Flash / MiMo | — | build | 5-20 |
 | Code review | V4 Flash | — | build | 2-4 |
-| Wayfinder (map) | Qwen3.7 Max | — | build | 1-3 |
-| Wayfinder (re-chart) | Qwen3.7 Max | — | build | 1-2 |
+| Wayfinder (map) | V4 Flash | Max effort if map is wrong | build | 1-3 |
+| Wayfinder (re-chart) | V4 Flash | Max effort (rare) | build | 1-2 |
 | Wayfinder (tickets) | V4 Flash | — | build | 3-10+ |
 
 </details>
@@ -548,17 +553,16 @@ Action: bump default for auth-scoped work to V4 Pro
 <details>
 <summary><strong>Budget Tracking</strong> — click to expand</summary>
 
-$60/month. A typical feature cycle costs ~**$0.04-0.25** with the default-first routing.
+$60/month. A typical feature cycle costs ~**$0.04-0.25** with the Flash-for-everything routing.
 That's **240-1,500 features per month** if you route correctly.
 
 | Routing strategy | Features/month (max) |
 |---|---|
-| **Flash-first (this guide)** | **~240-1,500** |
-| Flash for everything | ~200+ |
-| Balanced (per-stage model pinning) | ~60-120 |
-| Qwen3.7 Max for everything | ~5-10 (don't) |
+| **Flash for everything (this guide)** | **~240-1,500** |
+| Balanced (per-stage model pinning, pre-0731) | ~60-120 |
+| Max effort on every call | ~200+ (slower, same token cost) |
 
-The buffer is now large enough ($40-50/month) that even heavy months with multiple architecture scans, wayfinders, and bug fixes won't break the budget.
+Escalation to max effort costs the same per token as normal Flash — the only price is latency, not dollars. The buffer is large enough ($40-50/month) that even heavy months with multiple architecture scans, wayfinders, and bug fixes won't break the budget.
 
 </details>
 
@@ -566,4 +570,6 @@ The buffer is now large enough ($40-50/month) that even heavy months with multip
 
 ## Learning & Iteration
 
-This is for me to document my workflow plan so things will change over time~. Models on Go... tools I have access too.. local models??! new models??! subscriptions??!. 
+This is for me to document my workflow plan so things will change over time~. Models on Go... tools I have access too.. local models??! new models??! subscriptions??!.
+
+Open question: what's beyond max effort as the escalation ceiling? Not sure yet — revisit when new models land on Go.
