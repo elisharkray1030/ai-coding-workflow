@@ -47,7 +47,7 @@ I use the **`build`** agent for everything (`opencode run --agent build`). `plan
 
 ## Stages
 
-### grilling — the front door
+### grilling: interview for what you want
 
 <details>
 <summary>Interview in rounds over a design tree; done when the frontier is empty</summary>
@@ -62,7 +62,7 @@ Any fuzzy idea starts here. It's an interview in rounds over a **design tree** (
 
 Routing: Flash → **GLM 5.2 / Qwen3.8 Max** if the grill comes back shallow
 
-### to-spec — write it down
+### to-spec: turn the conversation into a spec
 
 <details>
 <summary>Synthesizes the grill into a spec — no re-interview</summary>
@@ -76,7 +76,7 @@ Do NOT re-interview. It just writes.
 
 Routing: Flash → **GLM 5.2 / Qwen3.8 Max** if it misses nuance
 
-### to-tickets — slice into tracer bullets
+### to-tickets: slice the spec into small tickets
 
 <details>
 <summary>Vertical tracer-bullet slices with blocking edges, published per tracker</summary>
@@ -90,7 +90,7 @@ Tracer-bullet tickets: narrow vertical slices through every layer (schema → AP
 
 Routing: Flash
 
-### triage — the gate
+### triage: decide who picks up each ticket
 
 <details>
 <summary>State machine: needs-triage → needs-info | ready-for-agent | ready-for-human | wontfix</summary>
@@ -105,13 +105,13 @@ Plus a category (`bug` / `enhancement`).
 
 Routing: Flash → max effort if it keeps misclassifying
 
-### implement — the build
+### implement: build the ticket
 
 `/tdd` at pre-agreed seams → typecheck regularly → full suite → `/code-review` → commit.
 
 Routing: **Flash, strictly** — max effort only, never a model switch
 
-### code-review — the gate out
+### code-review: check the code against spec + standards
 
 <details>
 <summary>Two parallel axes on fixed-point...HEAD: Standards vs Spec</summary>
