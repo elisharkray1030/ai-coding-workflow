@@ -47,12 +47,10 @@ I use the **`build`** agent for everything (`opencode run --agent build`). `plan
 
 ## Stages
 
-### grilling: interview for what you want
-
 <details>
-<summary>Interview in rounds over a design tree; done when the frontier is empty</summary>
+<summary>### grilling: interview for what you want</summary>
 
-Any fuzzy idea starts here. It's an interview in rounds over a **design tree** (every decision branches into the decisions hanging off it).
+An interview in rounds over a **design tree** (every decision branches into the decisions hanging off it).
 - Each round asks the whole **frontier** (the decisions whose prerequisites are already settled), numbered, with a recommended answer for each
 - **Facts are my job, not yours** — I dispatch sub-agents to look things up instead of making you research
 - Done when the frontier is empty: every branch visited, nothing silently assumed
@@ -62,10 +60,8 @@ Any fuzzy idea starts here. It's an interview in rounds over a **design tree** (
 
 Routing: Flash → **GLM 5.2 / Qwen3.8 Max** if the grill comes back shallow
 
-### to-spec: turn the conversation into a spec
-
 <details>
-<summary>Synthesizes the grill into a spec — no re-interview</summary>
+<summary>### to-spec: turn the conversation into a spec</summary>
 
 Do NOT re-interview. It just writes.
 1. Sketches the test seams first and checks them with you (existing seams preferred, highest possible, ideally one)
@@ -76,10 +72,8 @@ Do NOT re-interview. It just writes.
 
 Routing: Flash → **GLM 5.2 / Qwen3.8 Max** if it misses nuance
 
-### to-tickets: slice the spec into small tickets
-
 <details>
-<summary>Vertical tracer-bullet slices with blocking edges, published per tracker</summary>
+<summary>### to-tickets: slice the spec into small tickets</summary>
 
 Tracer-bullet tickets: narrow vertical slices through every layer (schema → API → logic → tests → UI), each demoable on its own and sized for one fresh context window. Every ticket declares its blocking edges.
 - Quizzes you on granularity before publishing (too coarse? too fine? merge? split?)
@@ -90,10 +84,8 @@ Tracer-bullet tickets: narrow vertical slices through every layer (schema → AP
 
 Routing: Flash
 
-### triage: decide who picks up each ticket
-
 <details>
-<summary>State machine: needs-triage → needs-info | ready-for-agent | ready-for-human | wontfix</summary>
+<summary>### triage: decide who picks up each ticket</summary>
 
 Plus a category (`bug` / `enhancement`).
 - `ready-for-agent` = the handoff into implement. Everything else exits or loops back
@@ -105,16 +97,17 @@ Plus a category (`bug` / `enhancement`).
 
 Routing: Flash → max effort if it keeps misclassifying
 
-### implement: build the ticket
+<details>
+<summary>### implement: build the ticket</summary>
 
 `/tdd` at pre-agreed seams → typecheck regularly → full suite → `/code-review` → commit.
 
+</details>
+
 Routing: **Flash, strictly** — max effort only, never a model switch
 
-### code-review: check the code against spec + standards
-
 <details>
-<summary>Two parallel axes on fixed-point...HEAD: Standards vs Spec</summary>
+<summary>### code-review: check the code against spec + standards</summary>
 
 Reviews `fixed-point...HEAD` (your commit/branch/tag, three-dot so it compares against the merge-base) on two parallel axes:
 - **Standards** — repo standards + the Fowler smell baseline
