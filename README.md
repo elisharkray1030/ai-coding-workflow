@@ -48,7 +48,7 @@ I use the **`build`** agent for everything (`opencode run --agent build`). `plan
 ## Stages
 
 <details>
-<summary>### grilling: interview for what you want</summary>
+<summary>grilling: interview for what you want</summary>
 
 An interview in rounds over a **design tree** (every decision branches into the decisions hanging off it).
 - Each round asks the whole **frontier** (the decisions whose prerequisites are already settled), numbered, with a recommended answer for each
@@ -58,10 +58,10 @@ An interview in rounds over a **design tree** (every decision branches into the 
 
 </details>
 
-Routing: Flash → **GLM 5.2 / Qwen3.8 Max** if the grill comes back shallow
+Escalation: GLM 5.2 / Qwen3.8 Max if the grill comes back shallow
 
 <details>
-<summary>### to-spec: turn the conversation into a spec</summary>
+<summary>to-spec: turn the conversation into a spec</summary>
 
 Do NOT re-interview. It just writes.
 1. Sketches the test seams first and checks them with you (existing seams preferred, highest possible, ideally one)
@@ -70,10 +70,10 @@ Do NOT re-interview. It just writes.
 
 </details>
 
-Routing: Flash → **GLM 5.2 / Qwen3.8 Max** if it misses nuance
+Escalation: GLM 5.2 / Qwen3.8 Max if it misses nuance
 
 <details>
-<summary>### to-tickets: slice the spec into small tickets</summary>
+<summary>to-tickets: slice the spec into small tickets</summary>
 
 Tracer-bullet tickets: narrow vertical slices through every layer (schema → API → logic → tests → UI), each demoable on its own and sized for one fresh context window. Every ticket declares its blocking edges.
 - Quizzes you on granularity before publishing (too coarse? too fine? merge? split?)
@@ -82,10 +82,10 @@ Tracer-bullet tickets: narrow vertical slices through every layer (schema → AP
 
 </details>
 
-Routing: Flash
+Escalation: none
 
 <details>
-<summary>### triage: decide who picks up each ticket</summary>
+<summary>triage: decide who picks up each ticket</summary>
 
 Plus a category (`bug` / `enhancement`).
 - `ready-for-agent` = the handoff into implement. Everything else exits or loops back
@@ -95,19 +95,19 @@ Plus a category (`bug` / `enhancement`).
 
 </details>
 
-Routing: Flash → max effort if it keeps misclassifying
+Escalation: max effort if it keeps misclassifying
 
 <details>
-<summary>### implement: build the ticket</summary>
+<summary>implement: build the ticket</summary>
 
 `/tdd` at pre-agreed seams → typecheck regularly → full suite → `/code-review` → commit.
 
 </details>
 
-Routing: **Flash, strictly** — max effort only, never a model switch
+Escalation: max effort only — no model switch
 
 <details>
-<summary>### code-review: check the code against spec + standards</summary>
+<summary>code-review: check the code against spec + standards</summary>
 
 Reviews `fixed-point...HEAD` (your commit/branch/tag, three-dot so it compares against the merge-base) on two parallel axes:
 - **Standards** — repo standards + the Fowler smell baseline
@@ -117,7 +117,7 @@ The two reports stay separate and are never reranked. A change can pass one axis
 
 </details>
 
-Routing: Flash → **MiMo V2.5 Pro / MiniMax M3** if the review comes back thin
+Escalation: MiMo V2.5 Pro / MiniMax M3 if the review comes back thin
 
 ---
 
@@ -139,7 +139,7 @@ For work too big for one session: a **map** (one issue labelled `wayfinder:map`)
 - Blocking uses native tracker dependencies; fog of war lives in "Not yet specified" and graduates as the frontier advances; out-of-scope never graduates
 - One ticket per session (research excepted); refer by name, never a bare id
 
-Routing: chart on Flash → max effort if the map is wrong · grilling tickets Flash → GLM 5.2 / Qwen3.8 Max if a session stalls
+Escalation: max effort if the map is wrong · GLM 5.2 / Qwen3.8 Max if a grilling ticket stalls
 
 ## Alternate paths
 
