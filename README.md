@@ -4,31 +4,48 @@ Inspired by **Matt Pocock's** skills -- AI Engineering/ Coding??? lol.
 
 Uses **OpenCode Go**.
 All skills from [`mattpocock/skills`](https://github.com/mattpocock/skills).
+0810: reorganized around the grilling-first main pipeline.
 
 ---
 
-## Routing Philosophy
+## The Main Pipeline
 
-**V4 Flash is the default for everything.** It scores 79% SWE-bench Verified, has 1M context, costs $0.14/$0.28 per million tokens, and has 31,650 req/5h — effectively unlimited. Since the 0731 update it handles *every* stage of *every* pipeline — including architecture scans and wayfinding that used to be pinned to pricier models.
+```
+idea → grilling → to-spec → to-tickets → triage → implement → code-review
+```
 
-**Escalate only when Flash proves insufficient.** Since the 0805 update, escalation is per-stage: the thinking stages step up to a premium model, while the high-volume code-writing stages stay strictly on Flash. Don't pre-assign expensive models to stages based on what the stage *could* need — wait for a concrete failure, then rerun that stage on its escalation target.
+```mermaid
+graph LR
+    ID[Idea] --> GR[ /grilling · V4 Flash]
+    GR --> SP[ /to-spec]
+    SP --> TK[ /to-tickets]
+    TK --> TR[ /triage]
+    TR -->|ready-for-agent| IM[ /implement · V4 Flash strictly]
+    IM --> Q{Quality gate}
+    Q -->|Pass| CR[ /code-review]
+    Q -->|Fail| IM
+    CR --> DN[Done]
 
-| Stage | Escalate to |
-|-------|-------------|
-| /grill-with-docs, /to-spec | GLM 5.2 or Qwen3.8 Max |
-| /prototype | GLM 5.2 |
-| /implement, /tdd | **V4 Flash, strictly** — max effort only, never a model switch |
-| /code-review | MiMo V2.5 Pro or MiniMax M3 |
-| /diagnosing-bugs | GLM 5.2 (max effort) or Qwen3.8 Max |
-| Everything else | Max effort on V4 Flash (unchanged) |
+    classDef red fill:#ff8787,color:#000
+    classDef purple fill:#9775fa,color:#000
+    classDef green fill:#69db7c,color:#000
+    classDef blue fill:#4dabf7,color:#000
+    classDef orange fill:#ffa94d,color:#000
+    classDef teal fill:#63e6be,color:#000
 
-Rule of thumb: the volume stages (implement, tdd) burn the most tokens — keep them on Flash. Spend escalations on the thinking stages (interview, spec, debugging, review), where a smarter model pays for itself.
+    class ID red
+    class GR,SP purple
+    class TK,TR blue
+    class IM orange
+    class CR teal
+    class DN green
+```
 
-The savings are dramatic: ~$0.04 for a simple feature vs ~$0.42 with the old model-per-stage routing. You stay safely within the $60/month budget even on heavy months.
+Every fuzzy idea enters through **grilling** — an interview in rounds that sharpens it until there are no silent assumptions left. **to-spec** writes it down (no re-interview). **to-tickets** slices it into tracer bullets. **triage** classifies the tickets — and any external issues/PRs — the `ready-for-agent` ones are grabbable by an agent. **implement** builds one. **code-review** gates it on two axes. Triage's other states exit the pipeline: `ready-for-human` / `wontfix` leave it, `needs-info` loops back to the reporter.
 
 ---
 
-## OpenCode Agents
+## Agents
 
 Uses the **`build`** agent via `opencode run --agent build` for everything. It has full tool access (read, edit, bash, subagents) and can handle every stage — planning docs, writing code, spawning research subagents, everything.
 
@@ -36,484 +53,180 @@ The **`plan`** agent exists but is too restricted for this skill set: it can't w
 
 ---
 
-<details>
-<summary><strong>Pipeline Diagrams</strong> — click to expand</summary>
+## Stages
 
-### 1. NEW PROJECT (from scratch)
+### grilling — the front door
 
-```mermaid
-graph LR
-    TR[ /triage] --> IN[ /grill-with-docs]
-    IN --> SP[ /to-spec]
-    SP --> TK[ /to-tickets]
-    TK --> IM[ /implement · V4 Flash]
-    IM --> Q{Pass?}
-    Q -->|Yes| CR[ /code-review]
-    Q -->|No| IM
-    CR --> DN[Done]
+Any fuzzy idea starts here. An interview in rounds that maps the design as a **design tree** — every decision branches into the decisions that hang off it.
 
-    classDef purple fill:#9775fa,color:#000
-    classDef green fill:#69db7c,color:#000
-    classDef blue fill:#4dabf7,color:#000
-    classDef orange fill:#ffa94d,color:#000
-    classDef teal fill:#63e6be,color:#000
-    classDef yellow fill:#fcc419,color:#000
-    classDef red fill:#ff8787,color:#000
+- **Rounds** — each round asks the whole **frontier**: every decision whose prerequisites are already settled. Questions you can ask *now* without guessing at answers you haven't heard yet.
+- **Numbered + recommended** — each question is numbered with a recommended answer (❓ Q1 + ➡️ my recommendation). You answer; the tree reshapes; the frontier advances. Questions whose answer depends on another open question belong to a later round.
+- **Facts are the agent's job** — when a frontier question needs a fact from the environment (filesystem, tools), the agent dispatches a sub-agent to find it. Never asks you for anything it could look up itself. A running exploration is an unsettled prerequisite — only the questions downstream of it wait.
+- **Done** — when the frontier is empty: every branch of the design tree visited, nothing left silently assumed. Nothing is acted on until you confirm shared understanding.
 
-    class TR,IN purple
-    class SP green
-    class TK blue
-    class IM orange
-    class CR teal
-    class DN green
+Variants:
+- **grill-me** — plain alias for `/grilling` (runs the same session).
+- **grill-with-docs** — same interview + `/domain-modeling`: writes ADRs and the CONTEXT.md glossary as decisions land. Use when you're changing the domain model, not just exploring it.
+
+| Default | Escalation |
+|---------|------------|
+| V4 Flash | GLM 5.2 or Qwen3.8 Max if the grill comes back shallow (fuzzy CONTEXT.md, unresolved domain terms) |
+
+### to-spec — from conversation to spec
+
+Synthesizes what you already discussed — **do NOT re-interview**. It just writes.
+
+1. Explores the repo, using the domain glossary vocabulary and respecting ADRs in the area it touches.
+2. **Sketches the seams first** — where the feature will be tested. Prefers existing seams, highest possible, ideally one. **Checks them with you** before writing anything.
+3. Writes the spec: Problem Statement → Solution → extensive numbered User Stories → Implementation Decisions → Testing Decisions → Out of Scope → Further Notes. No file paths or code snippets — they go stale (exception: decision-rich snippets from a prototype).
+4. Publishes per the configured tracker (see First-time setup): `.scratch/<feature-slug>/spec.md` on local-markdown, or a real issue on GitHub — and applies **ready-for-agent** (no further triage needed).
+
+| Default | Escalation |
+|---------|------------|
+| V4 Flash | GLM 5.2 / Qwen3.8 Max if it misses nuance |
+
+### to-tickets — slicing into tracer bullets
+
+Breaks the spec into **tracer-bullet tickets**: narrow vertical slices that each cut through every layer (schema → API → logic → tests → UI) and are demoable on their own. Sized to fit a single fresh context window. Each ticket declares its **blocking edges** — the tickets that must complete before it can start.
+
+- **Wide refactors are the exception** — a mechanical change whose blast radius fans across the whole codebase doesn't slice; it sequences as **expand–contract**: expand (add the new form beside the old, nothing breaks), migrate call sites in batches sized by blast radius (each batch its own ticket, CI stays green because the old form still exists), contract (delete the old form once no caller remains).
+- **Quizzes you on granularity** — presents the breakdown (title, blocked-by, what it delivers) and asks: granularity right? blocking edges correct? merge or split? Iterates until you approve.
+- **Publishes** — one file per ticket under `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered `01`+ in dependency order (blockers first), each with `Status: ready-for-agent`; or native blocking links on a real tracker. Work the **frontier**: any ticket whose blockers are all done.
+
+| Default | Escalation |
+|---------|------------|
+| V4 Flash | — |
+
+### triage — the state machine gate
+
+Moves issues (and external PRs — **a PR is an issue with attached code**) through a small state machine:
+
+- **Category**: `bug` | `enhancement`
+- **State**: `needs-triage` → `needs-info` | `ready-for-agent` | `ready-for-human` | `wontfix`
+
+**ready-for-agent** is the handoff token: fully specified, agent-grabbable — that's the gate into `/implement`. The other states exit the pipeline (`wontfix`, `ready-for-human`) or loop back (`needs-info` → `needs-triage` once the reporter replies).
+
+Process: gather context (redundancy check — already implemented? prior-rejection check — read `.out-of-scope/*.md`) → recommend category + state, wait for direction → **verify the claim** (reproduce the bug from the reporter's steps / check the PR diff and run its tests) → grill if needed → apply the outcome. Every comment posted to the tracker during triage starts with:
+
+```
+> *This was generated by AI during triage.*
 ```
 
-Start with `/triage` to categorize and route the ask. It runs a small state machine: `needs-triage` → `needs-info` (if ambiguous) → `ready-for-agent` or `ready-for-human`. Category labels (`bug`/`enhancement`) are set upfront. For PRs, the same states apply but read against the attached code. `/grill-with-docs` interviews you about the domain, builds CONTEXT.md. `/to-spec` formalizes what was discussed. `/to-tickets` breaks it into vertical-slice tickets with blocking edges. `/implement` writes the code — strictly V4 Flash (max effort only, no model switch). `/code-review` checks standards and spec compliance (escalate to MiMo V2.5 Pro / MiniMax M3 if it comes back thin).
+| Default | Escalation |
+|---------|------------|
+| V4 Flash | Max effort if it consistently misclassifies |
 
-### 2. ADDING A FEATURE
+### implement — the build
 
-```mermaid
-graph LR
-    TR[ /triage] --> IN[ /grill-with-docs]
-    IN --> IM[ /implement]
-    IM --> Q{Pass?}
-    Q -->|Yes| CR[ /code-review]
-    Q -->|No| IM
-    CR --> DN[Done]
+Implements the work described in the spec or tickets:
 
-    classDef purple fill:#9775fa,color:#000
-    classDef green fill:#69db7c,color:#000
-    classDef blue fill:#4dabf7,color:#000
-    classDef orange fill:#ffa94d,color:#000
-    classDef teal fill:#63e6be,color:#000
+- `/tdd` at pre-agreed seams (red → green, one slice at a time)
+- Typecheck regularly, single test files regularly
+- Full test suite once at the end
+- `/code-review` to review the work
+- Commit to the current branch
 
-    class TR,IN purple
-    class IM orange
-    class CR teal
-    class DN green
-```
+**Strictly V4 Flash.** The highest-volume stage — the only escalation is max effort, never a model switch.
 
-A lighter pipeline. `/triage` and `/grill-with-docs` research the existing codebase to understand context. Skip spec and tickets — you're extending what's there, not starting fresh. `/implement` writes the feature on V4 Flash, then `/code-review` checks it. For cross-cutting changes touching 3+ modules, rerun `/implement` at max effort — still V4 Flash, no model switch.
+### code-review — two-axis gate
 
-### 3. BUG FIX
+Reviews the diff between `HEAD` and a **fixed point you supply** (commit SHA, branch, tag, `main`, `HEAD~5` — three-dot, so it compares against the merge-base). Runs **two parallel sub-agents**:
 
-```mermaid
-graph LR
-    LO[ /diagnosing-bugs] --> CR[ /code-review]
-    CR --> D{Issues?}
-    D -->|No| DN[Done]
-    D -->|Yes| IM[ /implement]
-    IM --> CR
+- **Standards** — does the code follow the repo's documented coding standards? Always carries the **Fowler smell baseline** (12 smells from *Refactoring* ch.3 — Mysterious Name, Duplicated Code, Feature Envy, Data Clumps, Primitive Obsession, Repeated Switches, Shotgun Surgery, Divergent Change, Speculative Generality, Message Chains, Middle Man, Refused Bequest) on top. Repo standards override the baseline; smells are judgement calls, never hard violations; skip anything tooling already enforces.
+- **Spec** — does the code match the originating spec? Found via: issue references in commit messages (`#123`, `Closes #45`) → a path you passed → a spec under `docs/` / `specs/` / `.scratch/` → you. No spec = the Spec axis reports "no spec available".
 
-    classDef red fill:#ff8787,color:#000
-    classDef teal fill:#63e6be,color:#000
-    classDef green fill:#69db7c,color:#000
-    classDef orange fill:#ffa94d,color:#000
+Reports stay separate — a change can pass one axis and fail the other (standards-following but wrong thing; or exactly what was asked but breaking conventions). No reranking. Ends with a one-line summary per axis.
 
-    class LO red
-    class CR teal
-    class IM orange
-    class DN green
-```
+**Closing the loop** — `/code-review` is the gate, not the end. Discuss any findings it raises, then `/implement` the agreed fixes (strictly Flash) and loop until clean. Tell `/implement` what NOT to fix: a review can flag a "deviation" that is actually correct, and a fix agent will "correct" working code.
 
-`/diagnosing-bugs` is a single prompt that drives the entire debug cycle on V4 Flash. If the fix keeps failing, escalate to GLM 5.2 at max effort or Qwen3.8 Max. Review with `/code-review` (escalate to MiMo V2.5 Pro / MiniMax M3 if thin), then **discuss any issues it raises** — after that, `/implement` the agreed fixes (strictly Flash) and loop until clean.
-
-### 4. ARCHITECTURE REDESIGN
-
-```mermaid
-graph LR
-    AS[ /improve-codebase-architecture] --> SP[ /to-spec]
-    SP --> TK[ /to-tickets]
-    TK --> IM[ /implement]
-    IM --> CR[ /code-review]
-    CR --> DN[Done]
-
-    classDef yellow fill:#fcc419,color:#000
-    classDef green fill:#69db7c,color:#000
-    classDef blue fill:#4dabf7,color:#000
-    classDef orange fill:#ffa94d,color:#000
-    classDef teal fill:#63e6be,color:#000
-
-    class AS yellow
-    class SP green
-    class TK blue
-    class IM orange
-    class CR teal
-    class DN green
-```
-
-`/improve-codebase-architecture` scans the codebase for deepening opportunities and generates an HTML report — V4 Flash by default since the 0731 update (used to be pinned to a pricier model; only crank to max effort if the scan comes back shallow). `/to-spec` formalizes the plan. `/to-tickets` slices into work items. `/implement` on V4 Flash, max effort if the change outgrows it. `/code-review` to confirm.
-
-### 5. PROTOTYPE / SPIKE
-
-```mermaid
-graph LR
-    PR[ /prototype] --> IT[Iterate]
-    IT -.->|loop| PR
-
-    classDef orange fill:#ffa94d,color:#000
-    classDef purple fill:#9775fa,color:#000
-
-    class PR orange
-    class IT purple
-```
-
-`/prototype` generates throwaway code to answer a design question. V4 Flash or MiMo V2.5 — speed over quality. Escalate to GLM 5.2 if Flash/MiMo can't crack the design question. Iterate with the same cheap model until you have your answer. No spec, no review — this is learning, not shipping.
-
-### 6. WAYFINDER (complex project, multiple sessions)
-
-```mermaid
-graph LR
-    CM[ /wayfinder] --> RS[ /research]
-    RS --> PR[ /prototype]
-    PR --> GR[ /grill-with-docs]
-    GR --> TK[Task Tickets]
-    TK --> DN[Done]
-
-    classDef yellow fill:#fcc419,color:#000
-    classDef blue fill:#4dabf7,color:#000
-    classDef orange fill:#ffa94d,color:#000
-    classDef purple fill:#9775fa,color:#000
-    classDef teal fill:#63e6be,color:#000
-    classDef green fill:#69db7c,color:#000
-
-    class CM yellow
-    class RS,PR blue
-    class GR purple
-    class TK teal
-    class DN green
-```
-
-For projects too big for one agent session. Creates a **map** of decision tickets on the issue tracker — not build tickets, but questions whose resolution is a decision that unblocks the path forward.
-
-**How it works:**
-- **Charting** — `/wayfinder` (V4 Flash; max effort only if the map comes out wrong) names the destination, identifies what's known vs fog, and creates the initial tickets. The map is a single issue with: Destination, Notes, Decisions so far, Not yet specified (fog of war), Out of scope.
-- **Frontier** — tickets graduate from "fog" (not yet specified) into concrete decision tickets as the frontier advances. Each ticket is sized for one 100K-token agent session.
-- **Resolution** — each ticket is resolved independently by a V4 Flash sub-agent. A ticket closes when its question is answered (not when code is written), producing a decision recorded in the map's "Decisions so far" section.
-- **Done** — the map is complete when the way is clear: no decisions left to make before someone can go build the thing. The output is a handoff (spec, decision log, or change made in place), not a delivery.
-
-Everything after charting runs on V4 Flash sub-agents: research tickets, prototype tickets, grilling tickets, task tickets. Only a map re-chart (when the destination shifts or the frontier reveals the initial map was wrong) runs at max effort.
-
-</details>
+| Default | Escalation |
+|---------|------------|
+| V4 Flash | MiMo V2.5 Pro / MiniMax M3 if the review comes back thin |
 
 ---
 
-<details>
-<summary><strong>Model Reference</strong> — click to expand pricing table</summary>
+## Supporting Skills
 
-Pricing via OpenCode Go. "Req/5h" = estimated requests per 5-hour rolling window.
+Skills you reach for along the way — not stages, but called from within them.
 
-| Model | Input $/1M | Output $/1M | Req/5h | Req/mo | Context | Key Strength |
-|---|---|---|---|---|---|---|
-| **Qwen3.7 Max** | $2.50 | $7.50 | 950 | 4,770 | 1M | Highest SWE-bench Pro on Go (60.6%). Best for hard planning. |
-| **Qwen3.8 Max** | $2.00 | $6.00 | — | — | 1M | New Aug 2026. Multimodal (text/image/video). Escalation target for grill/spec/debugging. |
-| **DeepSeek V4 Pro** | $0.435 | $0.87 | 3,450 | 17,150 | 1M | LiveCodeBench 93.5%, Codeforces 3206. Strongest for implementation. |
-| **Kimi K2.6** | $0.95 | $4.00 | 1,150 | 5,750 | 262K | Agent Swarm (300 sub-agents). Best for agentic multi-file changes. |
-| **Kimi K2.7 Code** | $0.95 | $4.00 | 1,350 | 6,750 | 256K | Coding-focused model. More requests than K2.6. Solid mid-tier planner. |
-| **DeepSeek V4 Flash** | $0.14 | $0.28 | **31,650** | 158,150 | 1M | **Default workhorse.** 79% SWE-bench Verified. Cheap. Fast. |
-| **MiMo V2.5** | $0.14 | $0.28 | 30,100 | 150,400 | 1M | Budget workhorse. Same price as Flash, 1M context. |
-| **MiniMax M2.7** | $0.30 | $1.20 | 3,400 | 17,000 | 205K | Strong cost-per-benchmark-point (78% SWE-bench Verified at $0.30). |
-| **Grok 4.5** | $2.00 | $6.00 | 120 | 600 | 1M | xAI's latest. Fast reasoning, large context. |
-| **GLM-5.2** | $1.40 | $4.40 | 880 | 4,300 | 1M | Zhipu flagship. Strong bilingual coding (CN/EN). |
-| **GLM-5.1** | $1.40 | $4.40 | 880 | 4,300 | 128K | Solid all-rounder from Zhipu. |
-| **Kimi K3** | $3.00 | $15.00 | 110 | 490 | 128K | Moonshot's coding specialist. High output cost — use sparingly. |
-| **MiMo V2.5 Pro** | $0.435 | $0.87 | 3,250 | 16,300 | 1M | Upgraded MiMo. Same price tier as V4 Pro, lower request cap. |
-| **MiniMax M3** | $0.30 | $1.20 | 3,200 | 16,000 | 1M | MiniMax's latest. Improved over M2.7 at same price. |
-| **Qwen3.7 Plus** | $0.40 | $1.60 | 4,300 | 21,600 | 1M | Strong mid-tier Qwen. Good balance of cost and quality. |
-| **Qwen3.6 Plus** | $0.50 | $3.00 | 3,300 | 16,300 | 256K | Earlier Qwen gen at mid-range pricing. Solid reasoning. |
-| **Hy3** | $0.14 | $0.58 | 4,300 | 21,500 | 128K | Budget model. High throughput at Flash-like input pricing. |
-
-</details>
+- **tdd** — red→green loop; tests at pre-agreed seams only. No horizontal slicing (all tests first = testing imagined behaviour). No tautological or implementation-coupled tests. Expected values must come from an independent source of truth.
+- **domain-modeling** — builds the CONTEXT.md glossary + ADRs. Call whenever you're changing the domain model, not just reading it. The engine behind grill-with-docs. ADRs only when **hard to reverse + surprising without context + a real trade-off** — all three, else skip.
+- **diagnosing-bugs** — discipline for hard bugs, 6 phases:
+  1. **Build a tight red-capable feedback loop** — THE skill. One command that goes red on *this* bug: drives the exact code path, asserts the user's exact symptom, deterministic, fast (seconds), agent-runnable. No loop, no hypothesising — a 30-second flaky loop is barely better than none.
+  2. **Reproduce + minimise** — watch it go red on the user's failure (not a nearby one), then shrink the repro until every remaining element is load-bearing.
+  3. **Hypothesise** — 3–5 ranked, **falsifiable** hypotheses ("if X is the cause, then changing Y makes it disappear"). Shown to you before testing.
+  4. **Instrument** — one variable at a time. Debugger/REPL over logs; tagged debug logs (`[DEBUG-xxxx]`, one grep to clean); never "log everything and grep". Perf bugs: measure and bisect, logs are usually wrong.
+  5. **Fix + regression** — regression test before the fix, at a **correct seam** (exercises the real bug pattern at the call site). No correct seam = that itself is the finding — flag it.
+  6. **Cleanup + post-mortem** — instrumentation removed, throwaways deleted, the correct hypothesis stated in the commit, then: *what would have prevented this bug?* — hands off to improve-codebase-architecture when the answer is architectural.
+- **research** — delegated fact-finding against high-trust sources. Resolves wayfinder research tickets.
+- **prototype** — throwaway artifact to answer "how should it look / behave". One command to run, no persistence, no polish, verdict captured and committed to a throwaway branch.
+- **handoff** — compacts the conversation into a handoff doc for a fresh agent. Saved to the OS temp dir (not the repo), with a **suggested-skills** section. References other artifacts (specs, ADRs, tickets, commits) instead of duplicating them; redacts secrets.
+- **improve-codebase-architecture** — architecture scan for deepening opportunities, visual HTML report using the codebase-design vocabulary (module, interface, depth, seam, adapter, leverage, locality). V4 Flash by default; max effort if the scan comes back shallow. Also the handoff target from diagnosing-bugs phase 6.
 
 ---
 
-## Pipeline: Use Case & Routing
+## Scaled-up: wayfinder
 
-### 1. NEW PROJECT (from scratch)
+When work is too big for one agent session, **grilling scales up** into wayfinding: a shared **map** (one issue labelled `wayfinder:map`) of **decision tickets** — questions whose resolution is a decision, not slices of a build to execute. The map is an **index, not a store**: it gists each decision and links to the ticket holding the detail. Refer to tickets **by name**, never by bare id.
 
-```mermaid
-graph LR
-    TR[ /triage] --> IN[ /grill-with-docs]
-    IN --> SP[ /to-spec]
-    SP --> TK[ /to-tickets]
-    TK --> IM[ /implement · V4 Flash]
-    IM --> Q{Pass?}
-    Q -->|Yes| CR[ /code-review]
-    Q -->|No| IM
-    CR --> DN[Done]
+- **Charting** — a grilling + domain-modeling session names the **destination** (the spec/decision/change this effort is finding its way to), then grills breadth-first across the whole space. No fog surfaced = the whole journey fits one session — don't build a map. Otherwise create the map and the specifiable tickets, wire blocking edges in a second pass, fire the research subagents.
+- **Ticket types** — research (AFK, resolved by a `/research` subagent), prototype (HITL), grilling (HITL, the default), task (does rather than decides — unblocks a decision).
+- **Claim first** — a session claims a ticket by assigning it to itself before any work, so concurrent sessions skip it.
+- **Frontier** — open, unblocked, unclaimed tickets. Blocking uses the tracker's **native** dependency relationship so the frontier renders visually in the tracker's own UI.
+- **Fog of war** — in-scope decisions you can see coming but can't yet phrase sharply live in the map's **Not yet specified** section; they graduate into tickets as the frontier advances. Out-of-scope work never graduates — it stays out even if the destination is redrawn.
+- **Pace** — never resolve more than one ticket per session (research tickets excepted). A resolution is a comment + close + a one-line context pointer in the map's "Decisions so far".
 
-    classDef purple fill:#9775fa,color:#000
-    classDef green fill:#69db7c,color:#000
-    classDef blue fill:#4dabf7,color:#000
-    classDef orange fill:#ffa94d,color:#000
-    classDef teal fill:#63e6be,color:#000
-    classDef yellow fill:#fcc419,color:#000
-    classDef red fill:#ff8787,color:#000
-
-    class TR,IN purple
-    class SP green
-    class TK blue
-    class IM orange
-    class CR teal
-    class DN green
-```
-
-| Stage | Default | Escalation | Agent | Why |
-|-------|---------|------------|-------|-----|
-| **Triage** | V4 Flash | Max effort if misclassifies consistently | build | Routes through state machine (needs-triage → ready-for-agent/human). Greenfield has no codebase, so it's cheap. |
-| **Interview** | V4 Flash | GLM 5.2 / Qwen3.8 Max if grill comes back shallow | build | Domain conversation, no codebase research. Flash handles this fine; escalate when CONTEXT.md stays fuzzy. |
-| **Spec** | V4 Flash | GLM 5.2 / Qwen3.8 Max if it misses nuance | build | Synthesis of existing conversation. Pure formatting; escalate when nuance slips. |
-| **Tickets** | V4 Flash | — | build | Mechanical breakdown. |
-| **Implement (simple)** | V4 Flash | — | build | Single file, straightforward logic. |
-| **Implement (complex)** | V4 Flash | Max effort if fails quality gates — no model switch | build | Strictly Flash. The only escalation is more reasoning effort, same model. |
-| **Code Review** | V4 Flash | MiMo V2.5 Pro / MiniMax M3 if review is thin | build | Read diffs, check standards. Escalate when the review misses real issues. |
-
-**Est. cost:** simple ~**$0.04** | complex ~**$0.13**
+| Stage | Default | Escalation |
+|-------|---------|------------|
+| Chart the map | V4 Flash | Max effort only if the initial map is wrong |
+| Re-chart | V4 Flash | Max effort (rare — destination shifted or map was wrong) |
+| Research / prototype / task tickets | V4 Flash | — |
+| Grilling tickets | V4 Flash | GLM 5.2 / Qwen3.8 Max if a session stalls |
 
 ---
 
-### 2. ADDING A FEATURE
+## Alternate Paths
 
-```mermaid
-graph LR
-    TR[ /triage] --> IN[ /grill-with-docs]
-    IN --> IM[ /implement]
-    IM --> Q{Pass?}
-    Q -->|Yes| CR[ /code-review]
-    Q -->|No| IM
-    CR --> DN[Done]
+Not every task runs the full pipeline. Shortcuts:
 
-    classDef purple fill:#9775fa,color:#000
-    classDef green fill:#69db7c,color:#000
-    classDef blue fill:#4dabf7,color:#000
-    classDef orange fill:#ffa94d,color:#000
-    classDef teal fill:#63e6be,color:#000
+### New project (full pipeline)
+The whole main pipeline end to end. **Est: simple ~$0.04 | complex ~$0.13**
 
-    class TR,IN purple
-    class IM orange
-    class CR teal
-    class DN green
+### Adding a feature (trimmed pipeline)
 ```
+idea → (light grilling) → implement → code-review
+```
+Skip spec and tickets — you're extending what's there. Cross-cutting change (3+ modules)? Rerun `/implement` at max effort — still V4 Flash, no model switch. **Est: simple ~$0.03 | cross-cutting ~$0.08**
 
-| Stage | Default | Escalation | Agent | Why |
-|-------|---------|------------|-------|-----|
-| **Triage** | V4 Flash | Max effort if triage consistently misclassifies | build | Codebase reading — Flash can do it. |
-| **Interview** | V4 Flash | GLM 5.2 / Qwen3.8 Max if grill produces shallow CONTEXT.md | build | Codebase exploration. Start Flash, escalate if shallow. |
-| **Implement (simple)** | V4 Flash | — | build | Small change in existing patterns. |
-| **Implement (cross-cutting)** | V4 Flash | Max effort if it can't hold the scope — no model switch | build | Complex change. Strictly Flash; max effort if it loses the plot. |
-| **Code Review** | V4 Flash | MiMo V2.5 Pro / MiniMax M3 if thin | build | Review pass. Escalate when the review misses real issues. |
+### Bug fix
+```
+diagnosing-bugs → code-review → discuss issues → implement (agreed fixes) → loop until clean
+```
+Escalation: diagnosing-bugs → GLM 5.2 (max effort) / Qwen3.8 Max if the fix keeps failing; review → MiMo V2.5 Pro / MiniMax M3 if thin; the fix loop stays strictly Flash. **Est: easy ~$0.05 | hard ~$0.18**
 
-**Est. cost:** simple ~**$0.03** | cross-cutting ~**$0.08**
+### Architecture redesign
+```
+improve-codebase-architecture → to-spec → to-tickets → implement → code-review
+```
+The scan produces an HTML report of deepening opportunities; `/to-spec` formalizes the plan from it. **Est: light ~$0.08 | deep ~$0.25**
+
+### Prototype / spike
+```
+prototype → iterate → ... until answered
+```
+Throwaway code, the cheapest loop in the book. V4 Flash or MiMo V2.5 — speed over quality; GLM 5.2 only if the design question resists. No spec, no review — this is learning, not shipping. **Est: ~$0.01**
 
 ---
 
-### 3. BUG FIX
+## First-time setup (per repo)
 
-```mermaid
-graph LR
-    LO[ /diagnosing-bugs] --> CR[ /code-review]
-    CR --> D{Issues?}
-    D -->|No| DN[Done]
-    D -->|Yes| IM[ /implement]
-    IM --> CR
+Before the engineering skills work, run once per repo: `/setup-matt-pocock-skills`
 
-    classDef red fill:#ff8787,color:#000
-    classDef teal fill:#63e6be,color:#000
-    classDef green fill:#69db7c,color:#000
-    classDef orange fill:#ffa94d,color:#000
+- **Issue tracker** — GitHub (gh CLI), GitLab (glab CLI), or **local-markdown** (`.scratch/<feature>/` — good for solo projects or repos without a remote)
+- **Triage labels** — defaults are the five canonical role names (recommended); overrides only if the tracker already uses different strings
+- **Domain docs** — single-context: root `CONTEXT.md` + `docs/adr/` (default, fits almost every repo). Multi-context (`CONTEXT-MAP.md`) only for real monorepos.
 
-    class LO red
-    class CR teal
-    class IM orange
-    class DN green
-```
-
-`/diagnosing-bugs` is a single prompt that drives the entire debug cycle on V4 Flash. If the fix keeps failing tests, escalate to GLM 5.2 at max effort or Qwen3.8 Max. Review with `/code-review` (escalate to MiMo V2.5 Pro / MiniMax M3 if thin), then **discuss any issues it raises** — after that, `/implement` the agreed fixes (strictly Flash) and loop until clean.
-
-| Stage | Default | Escalation | Agent | Why |
-|-------|---------|------------|-------|-----|
-| **Diagnose & fix** | V4 Flash | GLM 5.2 (max effort) or Qwen3.8 Max if fix fails | build | Single prompt handles the whole debug cycle. Flash is fast and cheap for iteration; escalate when the fix keeps failing. |
-| **Review → discuss → implement** | V4 Flash | Review: MiMo V2.5 Pro / MiniMax M3. Implement: strictly Flash. | build | `/code-review` finds issues → discuss them → `/implement` the agreed fixes → loop until clean. |
-
-**Est. cost:** easy ~**$0.05** | hard ~**$0.18**
-
----
-
-### 4. ARCHITECTURE REDESIGN
-
-```mermaid
-graph LR
-    AS[ /improve-codebase-architecture] --> SP[ /to-spec]
-    SP --> TK[ /to-tickets]
-    TK --> IM[ /implement]
-    IM --> CR[ /code-review]
-    CR --> DN[Done]
-
-    classDef yellow fill:#fcc419,color:#000
-    classDef green fill:#69db7c,color:#000
-    classDef blue fill:#4dabf7,color:#000
-    classDef orange fill:#ffa94d,color:#000
-    classDef teal fill:#63e6be,color:#000
-
-    class AS yellow
-    class SP green
-    class TK blue
-    class IM orange
-    class CR teal
-    class DN green
-```
-
-| Stage | Default | Escalation | Agent | Why |
-|-------|---------|------------|-------|-----|
-| **Architecture scan** | V4 Flash | Max effort if scan is shallow | build | Produces an HTML report of deepening opportunities. Flash handles it now (0731 update); crank effort if it misses depth. |
-| **Spec** | V4 Flash | GLM 5.2 / Qwen3.8 Max if it misses nuance | build | Synthesis of scan output, not new reasoning. |
-| **Tickets** | V4 Flash | — | build | Breaking into tickets is mechanical. |
-| **Implement** | V4 Flash | Max effort for large-scale changes — no model switch | build | Strictly Flash; max effort when the change needs deeper reasoning. |
-| **Code Review** | V4 Flash | MiMo V2.5 Pro / MiniMax M3 if thin | build | Review pass. |
-
-**Est. cost:** light ~**$0.08** | deep ~**$0.25**
-
----
-
-### 5. PROTOTYPE / SPIKE
-
-```mermaid
-graph LR
-    PR[ /prototype] --> IT[Iterate]
-    IT -.->|loop| PR
-
-    classDef orange fill:#ffa94d,color:#000
-    classDef purple fill:#9775fa,color:#000
-
-    class PR orange
-    class IT purple
-```
-
-Throwaway code that answers a question. Speed over quality. Don't burn expensive models here.
-
-| Stage | Model | Agent | Why |
-|-------|-------|-------|-----|
-| **Prototype** | **V4 Flash** or **MiMo V2.5** → **GLM 5.2** if stuck | build | ~30,000 req/5h = unlimited. MiMo gives 1M context at same price. Escalate to GLM 5.2 for hard design questions. |
-| **Iterate** | Same | build | |
-
-**Est. cost:** ~**$0.01**
-
----
-
-### 6. WAYFINDER (complex project, multiple sessions)
-
-```mermaid
-graph LR
-    CM[ /wayfinder] --> RS[ /research]
-    RS --> PR[ /prototype]
-    PR --> GR[ /grill-with-docs]
-    GR --> TK[Task Tickets]
-    TK --> DN[Done]
-
-    classDef yellow fill:#fcc419,color:#000
-    classDef blue fill:#4dabf7,color:#000
-    classDef orange fill:#ffa94d,color:#000
-    classDef purple fill:#9775fa,color:#000
-    classDef teal fill:#63e6be,color:#000
-    classDef green fill:#69db7c,color:#000
-
-    class CM yellow
-    class RS,PR blue
-    class GR purple
-    class TK teal
-    class DN green
-```
-
-For projects too big for one agent session. Creates a **map** of decision tickets on the issue tracker. Not build tickets — questions whose resolution unblocks the path forward.
-
-The map is a single issue with: Destination, Notes, Decisions so far, Not yet specified (fog of war), Out of scope. Tickets graduate from fog → concrete as the frontier advances. Each ticket is sized for one 100K-token agent session and resolved independently. The map is done when the way is clear — no decisions left before someone can go build the thing. Only a re-chart (destination shift or wrong initial map) runs at max effort.
-
-| Stage | Default | Escalation | Agent | Why |
-|-------|---------|------------|-------|-----|
-| **Chart the map** | V4 Flash | Max effort only if the initial map is wrong | build | Name the destination, surface fog, create the initial tickets. Flash is enough since the 0731 update. |
-| **Re-chart** | V4 Flash | Max effort (rare) | build | Destination shifted or the initial map was wrong. Rare — only when frontier reveals a fundamentally incorrect map. |
-| **Research tickets** | V4 Flash | — | build | Read docs, investigate APIs. High volume, cheap. |
-| **Prototype tickets** | V4 Flash | — | build | Throwaway code to answer design questions. |
-| **Grilling tickets** | V4 Flash | GLM 5.2 / Qwen3.8 Max if a session stalls | build | Conversation to sharpen decisions one at a time. |
-| **Task tickets** | V4 Flash | — | build | Mechanical setup work. |
-
-**Est. cost:** ~**$0.15-0.30**
-
----
-
-## Prompt Guidance Per Stage
-
-### `/grill-with-docs` — The Interview
-
-```
-/grill-with-docs interview me about [FEATURE].
-I want to understand the domain, the problem, and what a good solution looks like.
-```
-
-Matt's skill:
-1. Explores codebase first (understand current state)
-2. Uses `/domain-modeling` to challenge fuzzy terms — when you say "user", do you mean Customer or Account Holder?
-3. Writes terms to `CONTEXT.md` as they crystallize (not batched)
-4. Offers ADRs sparingly — only when **hard to reverse + surprising + real trade-off**
-
-If the grill comes back shallow (fuzzy CONTEXT.md, unresolved domain terms), rerun at max effort or escalate to **GLM 5.2 / Qwen3.8 Max**.
-
-### `/to-spec` — From Conversation to Spec
-
-Synthesizes what you already discussed -- don't re-interview. Produces 6 sections:
-
-1. **Problem Statement** — user's perspective
-2. **Solution** — user's perspective
-3. **User Stories** — extensive numbered list (As a <actor>, I want <feature>, so that <benefit>)
-4. **Implementation Decisions** — modules, interfaces, schemas, API contracts (no file paths/code snippets)
-5. **Testing Decisions** — seams, what makes a good test
-6. **Out of Scope** — explicitly what's NOT being built
-
-Escalate to **GLM 5.2 / Qwen3.8 Max** if the spec misses nuance.
-
-### `/to-tickets` — Breaking into Tickets
-
-Each ticket is a **tracer bullet** — vertical slice through every layer:
-- Schema → API → Logic → Tests → UI
-- Each slice demoable on its own
-- Sized for one fresh context window
-- Blocking edges declared
-
-### `/implement` — Writing Code
-
-- Runs tests via `/tdd` at pre-agreed seams
-- Typechecking as you go
-- Single test files as you go
-- Full test suite at the end
-- Auto-runs `/code-review` when done
-- Commits to current branch
-
-**Strictly V4 Flash.** This is the highest-volume stage — the only escalation is max effort, never a model switch.
-
-### `/code-review` -- Two-Axis Review
-
-```
-/code-review review since main
-```
-
-Runs **two parallel sub-agents**:
-- **Standards** -- does the code follow documented standards and avoid Fowler code smells?
-- **Spec** -- does the code match what the issue asked for?
-
-They report independently. A change can pass one axis and fail the other.
-
-Escalate to **MiMo V2.5 Pro or MiniMax M3** if the review comes back thin or misses real issues.
-
-### `/diagnosing-bugs` — Debug Cycle
-
-`/diagnosing-bugs` is a single prompt that drives the entire debug cycle on V4 Flash. It builds a repro, diagnoses the root cause, writes a regression test, and applies the fix in one shot.
-
-Then: `/code-review` → **discuss any issues** → `/implement` the agreed fixes → loop until clean. If the fix keeps failing tests, escalate to **GLM 5.2 at max effort** or **Qwen3.8 Max**.
-
-| If someone says "it doesn't work" | Don't jump to hypothesizing |
-|----------------------------------|------------------------------|
-
-Build a tight red/green feedback loop before anything else. A 2-second deterministic repro changes everything. A 30-second flaky repro is barely useful.
+Writes `docs/agents/issue-tracker.md`, `docs/agents/triage-labels.md`, `docs/agents/domain.md`, and an `## Agent skills` block in AGENTS.md / CLAUDE.md. Edit those files directly later — re-run only to switch trackers or restart.
 
 ---
 
@@ -541,12 +254,57 @@ Action: bump default for auth-scoped work to start at max effort
 ---
 
 <details>
-<summary><strong>Model Route Quick Reference</strong> — click to expand</summary>
+<summary><strong>Routing & Models</strong> — click to expand</summary>
+
+## Routing Philosophy
+
+**V4 Flash is the default for everything.** It scores 79% SWE-bench Verified, has 1M context, costs $0.14/$0.28 per million tokens, and has 31,650 req/5h — effectively unlimited. Since the 0731 update it handles *every* stage of *every* pipeline — including architecture scans and wayfinding that used to be pinned to pricier models.
+
+**Escalate only when Flash proves insufficient.** Since the 0805 update, escalation is per-stage: the thinking stages step up to a premium model, while the high-volume code-writing stages stay strictly on Flash. Don't pre-assign expensive models to stages based on what the stage *could* need — wait for a concrete failure, then rerun that stage on its escalation target.
+
+| Stage | Escalate to |
+|-------|-------------|
+| grilling, to-spec | GLM 5.2 or Qwen3.8 Max |
+| prototype | GLM 5.2 |
+| implement, tdd | **V4 Flash, strictly** — max effort only, never a model switch |
+| code-review | MiMo V2.5 Pro or MiniMax M3 |
+| diagnosing-bugs | GLM 5.2 (max effort) or Qwen3.8 Max |
+| Everything else | Max effort on V4 Flash (unchanged) |
+
+Rule of thumb: the volume stages (implement, tdd) burn the most tokens — keep them on Flash. Spend escalations on the thinking stages (grilling, spec, debugging, review), where a smarter model pays for itself.
+
+The savings are dramatic: ~$0.04 for a simple feature vs ~$0.42 with the old model-per-stage routing. You stay safely within the $60/month budget even on heavy months.
+
+## Model Reference
+
+Pricing via OpenCode Go. "Req/5h" = estimated requests per 5-hour rolling window.
+
+| Model | Input $/1M | Output $/1M | Req/5h | Req/mo | Context | Key Strength |
+|---|---|---|---|---|---|---|
+| **Qwen3.7 Max** | $2.50 | $7.50 | 950 | 4,770 | 1M | Highest SWE-bench Pro on Go (60.6%). Best for hard planning. |
+| **Qwen3.8 Max** | $2.00 | $6.00 | — | — | 1M | New Aug 2026. Multimodal (text/image/video). Escalation target for grill/spec/debugging. |
+| **DeepSeek V4 Pro** | $0.435 | $0.87 | 3,450 | 17,150 | 1M | LiveCodeBench 93.5%, Codeforces 3206. Strongest for implementation. |
+| **Kimi K2.6** | $0.95 | $4.00 | 1,150 | 5,750 | 262K | Agent Swarm (300 sub-agents). Best for agentic multi-file changes. |
+| **Kimi K2.7 Code** | $0.95 | $4.00 | 1,350 | 6,750 | 256K | Coding-focused model. More requests than K2.6. Solid mid-tier planner. |
+| **DeepSeek V4 Flash** | $0.14 | $0.28 | **31,650** | 158,150 | 1M | **Default workhorse.** 79% SWE-bench Verified. Cheap. Fast. |
+| **MiMo V2.5** | $0.14 | $0.28 | 30,100 | 150,400 | 1M | Budget workhorse. Same price as Flash, 1M context. |
+| **MiniMax M2.7** | $0.30 | $1.20 | 3,400 | 17,000 | 205K | Strong cost-per-benchmark-point (78% SWE-bench Verified at $0.30). |
+| **Grok 4.5** | $2.00 | $6.00 | 120 | 600 | 1M | xAI's latest. Fast reasoning, large context. |
+| **GLM-5.2** | $1.40 | $4.40 | 880 | 4,300 | 1M | Zhipu flagship. Strong bilingual coding (CN/EN). |
+| **GLM-5.1** | $1.40 | $4.40 | 880 | 4,300 | 128K | Solid all-rounder from Zhipu. |
+| **Kimi K3** | $3.00 | $15.00 | 110 | 490 | 128K | Moonshot's coding specialist. High output cost — use sparingly. |
+| **MiMo V2.5 Pro** | $0.435 | $0.87 | 3,250 | 16,300 | 1M | Upgraded MiMo. Same price tier as V4 Pro, lower request cap. |
+| **MiniMax M3** | $0.30 | $1.20 | 3,200 | 16,000 | 1M | MiniMax's latest. Improved over M2.7 at same price. |
+| **Qwen3.7 Plus** | $0.40 | $1.60 | 4,300 | 21,600 | 1M | Strong mid-tier Qwen. Good balance of cost and quality. |
+| **Qwen3.6 Plus** | $0.50 | $3.00 | 3,300 | 16,300 | 256K | Earlier Qwen gen at mid-range pricing. Solid reasoning. |
+| **Hy3** | $0.14 | $0.58 | 4,300 | 21,500 | 128K | Budget model. High throughput at Flash-like input pricing. |
+
+## Model Route Quick Reference
 
 | Task Type | Default | Escalation | Agent | Est. req |
 |-----------|---------|------------|-------|----------|
 | Triage | V4 Flash | Max effort | build | 1-2 |
-| Codebase research / grill | V4 Flash | GLM 5.2 / Qwen3.8 Max if shallow | build | 3-8 |
+| Grilling (incl. grill-with-docs) | V4 Flash | GLM 5.2 / Qwen3.8 Max if shallow | build | 3-8 |
 | Planning / spec (new project) | V4 Flash | GLM 5.2 / Qwen3.8 Max | build | 1-3 |
 | Tickets | V4 Flash | — | build | 3-5 |
 | Implementation (simple) | V4 Flash | — | build | 3-8 |
@@ -556,6 +314,8 @@ Action: bump default for auth-scoped work to start at max effort
 | Architecture scan (deep w/ grill loop) | V4 Flash | Max effort if shallow | build | 3-6 |
 | Prototype | V4 Flash / MiMo | GLM 5.2 | build | 5-20 |
 | Code review | V4 Flash | MiMo V2.5 Pro / MiniMax M3 | build | 2-4 |
+| Research | V4 Flash | — | build | 2-5 |
+| Handoff | V4 Flash | — | build | 1 |
 | Wayfinder (map) | V4 Flash | Max effort if map is wrong | build | 1-3 |
 | Wayfinder (re-chart) | V4 Flash | Max effort (rare) | build | 1-2 |
 | Wayfinder (tickets) | V4 Flash | — | build | 3-10+ |
@@ -586,4 +346,8 @@ Escalation to max effort costs the same per token as normal Flash — the only p
 
 This is for me to document my workflow plan so things will change over time~. Models on Go... tools I have access too.. local models??! new models??! subscriptions??!.
 
+0810 update: reorganized around the grilling-first main pipeline (idea → grilling → to-spec → to-tickets → triage → implement → code-review). Triage moved from the front door to the gate before implement; wayfinder reframed as scaled-up grilling; new supporting skills documented (handoff, research); the `.scratch/` tracker convention and `/setup-matt-pocock-skills` per-repo setup added. All stage mechanics verified against `mattpocock/skills` @ main (Aug 2026).
+
 0805 update: escalation is now per-stage model switching — thinking stages step up (GLM 5.2, Qwen3.8 Max, MiMo V2.5 Pro, MiniMax M3), /implement stays strictly on V4 Flash. Open question: do any stages deserve a model above the current escalation targets (gpt-5.6-luna just landed on Go)? Revisit as the lineup grows.
+
+Also in upstream, not yet adopted: to-questionnaire, wait-what, ask-matt, teach, wizard, writing-for-agents.
