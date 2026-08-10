@@ -1,10 +1,10 @@
 # AI Coding Workflow
 
-Inspired by **Matt Pocock's** skills -- AI Engineering/ Coding??? lol. Runs on **OpenCode Go** with [`mattpocock/skills`](https://github.com/mattpocock/skills). Flash-first routing: **V4 Flash is the default for every stage** — escalate only on concrete failure. (0810: grilling-first pipeline)
+Inspired by **Matt Pocock's** skills -- AI Engineering/ Coding??? lol. Runs on **OpenCode Go** with [`mattpocock/skills`](https://github.com/mattpocock/skills). The whole thing is Flash-first: **V4 Flash is the default for every stage**, and I only switch models when Flash actually lets me down. (0810: grilling-first pipeline)
 
 ---
 
-## The Main Pipeline
+## The main pipeline
 
 ```
 idea → grilling → to-spec → to-tickets → triage → implement → code-review
@@ -37,87 +37,93 @@ graph LR
     class DN green
 ```
 
-Every fuzzy idea gets grilled into shape, written into a spec, sliced into tickets, triaged for agent-readiness, implemented, and reviewed. Triage's other states (`ready-for-human`, `wontfix`, `needs-info`) exit or loop back.
+A fuzzy idea walks in, gets grilled into shape, specced, sliced into tickets, triaged, built, and reviewed before it ships. If triage says anything other than `ready-for-agent` (`ready-for-human`, `wontfix`, `needs-info`), it exits the pipeline or loops back for more info.
 
 ## Agents
 
-Use the **`build`** agent for everything (`opencode run --agent build`). `plan` is too restricted — it can't write CONTEXT.md/ADRs/tickets or spawn `general` subagents.
+I use the **`build`** agent for everything (`opencode run --agent build`). `plan` is too restricted: it can't write CONTEXT.md/ADRs/tickets or spawn `general` subagents. Not worth the mental overhead of deciding per stage.
 
 ---
 
 ## Stages
 
 ### grilling — the front door
-Interview in rounds over a **design tree** (every decision branches into the decisions hanging off it).
-- Each round asks the whole **frontier** — decisions whose prerequisites are settled — numbered, with a recommended answer each
-- **Facts are the agent's job** (dispatch sub-agents); decisions are yours
-- Done when the frontier is empty: no silent assumptions left
-- `grill-me` = alias · `grill-with-docs` = grilling + `/domain-modeling` (writes ADRs + CONTEXT.md glossary as decisions land)
 
-Routing: Flash → **GLM 5.2 / Qwen3.8 Max** if shallow
+Any fuzzy idea starts here. It's an interview in rounds over a **design tree** (every decision branches into the decisions hanging off it).
+- Each round asks the whole **frontier** (the decisions whose prerequisites are already settled), numbered, with a recommended answer for each
+- **Facts are my job, not yours** — I dispatch sub-agents to look things up instead of making you research
+- Done when the frontier is empty: every branch visited, nothing silently assumed
+- `grill-me` = alias for the same session · `grill-with-docs` = grilling + `/domain-modeling` (writes ADRs + the CONTEXT.md glossary as decisions land)
+
+Routing: Flash → **GLM 5.2 / Qwen3.8 Max** if the grill comes back shallow
 
 ### to-spec — write it down
-Synthesizes the grill — do **NOT** re-interview.
-1. Sketches the test seams first, confirms them with you (existing seams, highest, ideally one)
+
+Synthesizes the grill. Do NOT re-interview. It just writes.
+1. Sketches the test seams first and checks them with you (existing seams preferred, highest possible, ideally one)
 2. Writes: Problem → Solution → User Stories → Implementation Decisions → Testing Decisions → Out of Scope
-3. Publishes per tracker (`.scratch/<slug>/spec.md` or a real issue), applies `ready-for-agent`
+3. Publishes per tracker (`.scratch/<slug>/spec.md` or a real issue) and applies `ready-for-agent`
 
 Routing: Flash → **GLM 5.2 / Qwen3.8 Max** if it misses nuance
 
 ### to-tickets — slice into tracer bullets
-Vertical slices through every layer (schema → API → logic → tests → UI), each demoable alone, sized for one context window, blocking edges declared.
-- Quizzes you on granularity before publishing
-- Publishes `.scratch/<slug>/issues/<NN>-<slug>.md` (01+, blockers first, `Status: ready-for-agent`) or native blocking links
-- Wide refactors → **expand–contract**, not slices
+
+Tracer-bullet tickets: narrow vertical slices through every layer (schema → API → logic → tests → UI), each demoable on its own and sized for one fresh context window. Every ticket declares its blocking edges.
+- Quizzes you on granularity before publishing (too coarse? too fine? merge? split?)
+- Publishes `.scratch/<slug>/issues/<NN>-<slug>.md` (01+, blockers first, `Status: ready-for-agent`) or native blocking links on a real tracker
+- Wide refactors are the exception → **expand–contract**, not slices
 
 Routing: Flash
 
 ### triage — the gate
-State machine: `needs-triage` → `needs-info` | `ready-for-agent` | `ready-for-human` | `wontfix`, + category (`bug` / `enhancement`).
-- `ready-for-agent` = the handoff into implement; other states exit or loop
-- Also the door for external issues/PRs (a PR is an issue with attached code)
-- Redundancy + `.out-of-scope/` prior-rejection checks → verify the claim → grill if needed
-- Tracker comments prefixed `> *This was generated by AI during triage.*`
 
-Routing: Flash → max effort if misclassifying
+The state machine: `needs-triage` → `needs-info` | `ready-for-agent` | `ready-for-human` | `wontfix`, plus a category (`bug` / `enhancement`).
+- `ready-for-agent` = the handoff into implement. Everything else exits or loops back
+- Also the door for external issues/PRs (a PR is just an issue with code attached)
+- Checks redundancy + `.out-of-scope/` prior rejections → verifies the claim → grills if needed
+- Tracker comments get prefixed `> *This was generated by AI during triage.*`
+
+Routing: Flash → max effort if it keeps misclassifying
 
 ### implement — the build
+
 `/tdd` at pre-agreed seams → typecheck regularly → full suite → `/code-review` → commit.
 
-Routing: **Flash strictly** — max effort only, never a model switch
+Routing: **Flash, strictly** — max effort only, never a model switch
 
 ### code-review — the gate out
-Reviews `fixed-point...HEAD` (your commit/branch/tag, three-dot vs merge-base) on two parallel axes:
-- **Standards** — repo standards + Fowler smell baseline
-- **Spec** — matches the originating spec (from commit refs, a path, or `.scratch/`)
 
-Reports stay separate — no reranking. Discuss findings, then `/implement` the agreed fixes and loop until clean.
+Reviews `fixed-point...HEAD` (your commit/branch/tag, three-dot so it compares against the merge-base) on two parallel axes:
+- **Standards** — repo standards + the Fowler smell baseline
+- **Spec** — does it match the originating spec? (found via commit refs, a path you passed, or `.scratch/`)
 
-Routing: Flash → **MiMo V2.5 Pro / MiniMax M3** if thin
+The two reports stay separate and are never reranked. A change can pass one axis and fail the other. Discuss the findings, then `/implement` the agreed fixes and loop until clean.
+
+Routing: Flash → **MiMo V2.5 Pro / MiniMax M3** if the review comes back thin
 
 ---
 
-## Supporting Skills
+## Supporting skills
 
-- **tdd** — red→green at pre-agreed seams; no horizontal slicing, no tautological/impl-coupled tests
-- **domain-modeling** — CONTEXT.md glossary + ADRs; engine behind grill-with-docs; ADRs only when hard-to-reverse + surprising + real trade-off
-- **diagnosing-bugs** — 6 phases: red-capable loop → reproduce+minimise → 3–5 ranked falsifiable hypotheses (shown to you) → instrument → fix+regression (no correct seam = the finding) → cleanup+post-mortem
-- **research** — delegated fact-finding; resolves wayfinder research tickets
-- **prototype** — throwaway artifact for "how should it look/behave"; one command, no persistence, no polish
-- **handoff** — compacts the conversation to OS temp for a fresh agent, with a suggested-skills section; redacts secrets
-- **improve-codebase-architecture** — arch scan → visual HTML report; also diagnosing-bugs phase-6 handoff target
+- **tdd** — red→green at pre-agreed seams; no horizontal slicing, no tautological or impl-coupled tests
+- **domain-modeling** — the CONTEXT.md glossary + ADRs; the engine behind grill-with-docs. ADRs only when hard-to-reverse + surprising + a real trade-off
+- **diagnosing-bugs** — 6 phases: red-capable loop → reproduce+minimise → 3–5 ranked falsifiable hypotheses (shown to you) → instrument → fix+regression (no correct seam = the finding itself) → cleanup+post-mortem
+- **research** — delegated fact-finding against high-trust sources; resolves wayfinder research tickets
+- **prototype** — throwaway artifact to answer "how should it look / behave"; one command to run, no persistence, no polish
+- **handoff** — compacts the conversation into a doc for a fresh agent (saved to OS temp, not the repo), with a suggested-skills section; redacts secrets
+- **improve-codebase-architecture** — architecture scan → visual HTML report; also the target when diagnosing-bugs phase 6 finds no good seam
 
 ## Wayfinder — grilling, scaled up
 
-For work too big for one session: a **map** (`wayfinder:map` issue) of **decision tickets** (research / prototype / grilling / task) — questions whose resolution is a decision, not a build slice. The map is an index, not a store.
-- Chart via grilling + domain-modeling; name the **destination** first
-- Claim a ticket by assignment before working it; frontier = open + unblocked + unclaimed
-- Native blocking edges; fog of war → "Not yet specified", graduates as the frontier advances; out-of-scope never graduates
-- One ticket per session (research excepted); refer by name, never bare id
+For work too big for one session: a **map** (one issue labelled `wayfinder:map`) of **decision tickets** (research / prototype / grilling / task). These are questions whose resolution is a decision, not slices of a build to execute. The map is an index, not a store.
+- Chart via grilling + domain-modeling, naming the destination first
+- Claim a ticket by assigning it before working it; the frontier = open, unblocked, unclaimed
+- Blocking uses native tracker dependencies; fog of war lives in "Not yet specified" and graduates as the frontier advances; out-of-scope never graduates
+- One ticket per session (research excepted); refer by name, never a bare id
 
-Routing: chart Flash → max effort if map wrong · grilling tickets Flash → GLM 5.2 / Qwen3.8 Max if stalled
+Routing: chart on Flash → max effort if the map is wrong · grilling tickets Flash → GLM 5.2 / Qwen3.8 Max if a session stalls
 
-## Alternate Paths
+## Alternate paths
 
 | Path | Flow | Est. cost |
 |------|------|-----------|
@@ -129,16 +135,16 @@ Routing: chart Flash → max effort if map wrong · grilling tickets Flash → G
 
 ## First-time setup (per repo)
 
-Run `/setup-matt-pocock-skills` once per repo: pick tracker (GitHub / GitLab / local `.scratch/`), triage labels, domain docs → writes `docs/agents/*.md` + an `## Agent skills` block in AGENTS.md / CLAUDE.md.
+Run `/setup-matt-pocock-skills` once per repo: pick a tracker (GitHub / GitLab / local `.scratch/`), triage labels, domain docs. It writes `docs/agents/*.md` plus an `## Agent skills` block in AGENTS.md / CLAUDE.md.
 
-## Routing Feedback
+## Routing feedback
 
-Escalations are data. Track per task type; update the routing tables when: 3+ same-type escalations in 2 weeks, a routed model gets deprecated, or a model at Flash prices beats Flash. Stale routing is worse than no routing.
+Escalations are data. Track them per task type, and update the tables when: 3+ same-type escalations in 2 weeks, a routed model gets deprecated, or a model at Flash prices beats Flash. Stale routing is worse than no routing.
 
 ---
 
 <details>
-<summary><strong>Routing & Models</strong> — expand</summary>
+<summary><strong>Routing & models</strong> — expand</summary>
 
 **Escalation** (thinking stages step up; volume stages stay Flash):
 
@@ -151,7 +157,7 @@ Escalations are data. Track per task type; update the routing tables when: 3+ sa
 | diagnosing-bugs | GLM 5.2 (max effort) or Qwen3.8 Max |
 | everything else | Max effort on V4 Flash |
 
-Rule of thumb: volume stages (implement, tdd) burn the most tokens — keep them on Flash; spend escalations on thinking stages (grilling, spec, debugging, review). A simple feature costs ~$0.04 vs ~$0.42 with the old model-per-stage routing.
+Rule of thumb: volume stages (implement, tdd) burn the most tokens, so they stay on Flash. Spend escalations on the thinking stages (grilling, spec, debugging, review). A simple feature costs ~$0.04 vs ~$0.42 with the old model-per-stage routing.
 
 **Model Reference** (pricing via OpenCode Go; Req/5h = est. requests per 5-hour window)
 
@@ -201,7 +207,7 @@ Rule of thumb: volume stages (implement, tdd) burn the most tokens — keep them
 ---
 
 <details>
-<summary><strong>Budget Tracking</strong> — expand</summary>
+<summary><strong>Budget tracking</strong> — expand</summary>
 
 $60/month. A typical feature cycle costs ~**$0.04–0.25** → **240–1,500 features/month** if you route correctly.
 
@@ -211,18 +217,18 @@ $60/month. A typical feature cycle costs ~**$0.04–0.25** → **240–1,500 fea
 | Balanced (per-stage model pinning, pre-0731) | ~60–120 |
 | Max effort on every call | ~200+ (slower, same token cost) |
 
-Max-effort escalation costs the same per token — the only price is latency. Model escalations (GLM 5.2, Qwen3.8 Max) cost more per token but are rare by design. The $40–50 buffer covers even heavy months (multiple architecture scans, wayfinders, bug fixes).
+Max-effort escalation costs the same per token, the only price is latency. Model escalations (GLM 5.2, Qwen3.8 Max) cost more per token but are rare by design. The $40–50 buffer covers even heavy months (multiple architecture scans, wayfinders, bug fixes).
 
 </details>
 
 ---
 
-## Learning & Iteration
+## Learning & iteration
 
 This is for me to document my workflow plan so things will change over time~. Models on Go... tools I have access too.. local models??! new models??! subscriptions??!.
 
-0810: reorganized around the grilling-first pipeline; triage moved from front door to gate-before-implement; wayfinder = scaled-up grilling; added handoff/research, the `.scratch/` convention, and per-repo setup. Mechanics verified against `mattpocock/skills` @ main (Aug 2026).
+0810: reorganized around the grilling-first pipeline; triage moved from front door to the gate before implement; wayfinder = grilling at scale; added handoff/research, the `.scratch/` convention, and per-repo setup. Mechanics verified against `mattpocock/skills` @ main (Aug 2026).
 
-0805: per-stage escalation — thinking stages step up (GLM 5.2, Qwen3.8 Max, MiMo V2.5 Pro, MiniMax M3), /implement stays strictly Flash. Open question: do any stages deserve a model above the current escalation targets (gpt-5.6-luna just landed on Go)? Revisit as the lineup grows.
+0805: per-stage escalation — thinking stages step up (GLM 5.2, Qwen3.8 Max, MiMo V2.5 Pro, MiniMax M3), /implement stays strictly Flash. Open question: does any stage deserve a model above the current escalation targets (gpt-5.6-luna just landed on Go)? Revisit as the lineup grows.
 
 Also in upstream, not yet adopted: to-questionnaire, wait-what, ask-matt, teach, wizard, writing-for-agents.
