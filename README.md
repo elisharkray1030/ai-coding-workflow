@@ -20,7 +20,9 @@ graph LR
     IM --> Q{Quality gate}
     Q -->|Pass| CR[ /code-review]
     Q -->|Fail| IM
-    CR --> DN[Done]
+    CR --> LOOP{Anything else to fix or build?}
+    LOOP -->|More to build or fix| SP
+    LOOP -->|Nothing left| DN[Done]
 
     classDef red fill:#ff8787,color:#000
     classDef purple fill:#9775fa,color:#000
@@ -38,6 +40,8 @@ graph LR
 ```
 
 A fuzzy idea walks in, gets grilled into shape, specced, sliced into tickets, triaged, built, and reviewed before it ships. If triage says anything other than `ready-for-agent` (`ready-for-human`, `wontfix`, `needs-info`), it exits the pipeline or loops back for more info.
+
+Review runs inside implement already — no separate review step to remember for a normal ticket. After it ships, I ask if there's anything else to fix or build before moving on; if yes, the whole pipeline loops again from to-spec until nothing's left.
 
 ## Agents
 
@@ -101,6 +105,9 @@ Escalation: max effort if it keeps misclassifying
 <summary>implement: build the ticket</summary>
 
 `/tdd` at pre-agreed seams → typecheck regularly → full suite → `/code-review` → commit.
+- Code review is built in — it runs at the end of implement, no extra step to remember
+- After it commits, I ask if there's anything else to fix or build. If yes, we loop the whole pipeline (to-spec → to-tickets → triage → implement → review) and do it again
+- Start implement in a **fresh session** — to-spec and to-tickets already wrote the spec + tickets into `.scratch/`, so the new session picks them up from disk with clean context
 
 </details>
 
@@ -114,6 +121,7 @@ Reviews `fixed-point...HEAD` (your commit/branch/tag, three-dot so it compares a
 - **Spec** — does it match the originating spec? (found via commit refs, a path you passed, or `.scratch/`)
 
 The two reports stay separate and are never reranked. A change can pass one axis and fail the other. Discuss the findings, then `/implement` the agreed fixes and loop until clean.
+- Runs automatically at the end of every implement — use this stage standalone when you want a review on demand (a whole branch, a range)
 
 </details>
 
@@ -244,6 +252,8 @@ Max-effort escalation costs the same per token, the only price is latency. Model
 ## Learning & iteration
 
 This is for me to document my workflow plan so things will change over time~. Models on Go... tools I have access too.. local models??! new models??! subscriptions??!.
+
+0811: code review is built into implement (runs automatically at the end of each ticket — no separate step). After a ticket ships, ask if anything else needs fixing/building and loop the whole pipeline from to-spec if yes. Start implement in a fresh session every time: to-spec/to-tickets leave `.scratch/` in the repo, so the new session pulls the spec + tickets from disk with clean context.
 
 0810: reorganized around the grilling-first pipeline; triage moved from front door to the gate before implement; wayfinder = grilling at scale; added handoff/research, the `.scratch/` convention, and per-repo setup. Mechanics verified against `mattpocock/skills` @ main (Aug 2026).
 
