@@ -41,8 +41,6 @@ graph LR
 
 A fuzzy idea walks in, gets grilled into shape, specced, sliced into tickets, triaged, built, and reviewed before it ships. If triage says anything other than `ready-for-agent` (`ready-for-human`, `wontfix`, `needs-info`), it exits the pipeline or loops back for more info.
 
-Review runs inside implement already — no separate review step to remember for a normal ticket. After it ships, I ask if there's anything else to fix or build before moving on; if yes, the whole pipeline loops again from to-spec until nothing's left.
-
 ## Agents
 
 I use the **`build`** agent for everything (`opencode run --agent build`). `plan` is too restricted: it can't write CONTEXT.md/ADRs/tickets or spawn `general` subagents. Not worth the mental overhead of deciding per stage.
@@ -171,17 +169,6 @@ Escalations are data. Track them per task type, and update the tables when: 3+ s
 
 <details>
 <summary><strong>Routing & models</strong> — expand</summary>
-
-**Escalation** (thinking stages step up; volume stages stay Flash):
-
-| Stage | Escalate to |
-|-------|-------------|
-| grilling, to-spec | GLM 5.2 or Qwen3.8 Max |
-| prototype | GLM 5.2 |
-| implement, tdd | **V4 Flash, strictly** — max effort only |
-| code-review | MiMo V2.5 Pro or MiniMax M3 |
-| diagnosing-bugs | GLM 5.2 (max effort) or Qwen3.8 Max |
-| everything else | Max effort on V4 Flash |
 
 Rule of thumb: volume stages (implement, tdd) burn the most tokens, so they stay on Flash. Spend escalations on the thinking stages (grilling, spec, debugging, review). A simple feature costs ~$0.04 vs ~$0.42 with the old model-per-stage routing.
 
