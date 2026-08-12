@@ -63,7 +63,7 @@ Only for issues and PRs that arrived from outside — bug reports, feature reque
 
 </details>
 
-Default: V4 Flash
+Default: V4 Flash<br>
 Escalation: max effort if it keeps misclassifying (rare — inbound lane only)
 
 ## Agents
@@ -85,7 +85,7 @@ An interview in rounds over a **design tree** (every decision branches into the 
 
 </details>
 
-Default: V4 Flash
+Default: V4 Flash<br>
 Escalation: GLM 5.2 / Luna if the grill comes back shallow
 
 <details>
@@ -98,7 +98,7 @@ Do NOT re-interview. It just writes.
 
 </details>
 
-Default: V4 Flash
+Default: V4 Flash<br>
 Escalation: GLM 5.2 (max effort) if it misses nuance
 
 <details>
@@ -111,7 +111,7 @@ Tracer-bullet tickets: narrow vertical slices through every layer (schema → AP
 
 </details>
 
-Default: V4 Flash
+Default: V4 Flash<br>
 Escalation: none
 
 <details>
@@ -124,7 +124,7 @@ Escalation: none
 
 </details>
 
-Default: V4 Flash
+Default: V4 Flash<br>
 Escalation: max effort only — no model switch
 
 <details>
@@ -139,7 +139,7 @@ The two reports stay separate and are never reranked. A change can pass one axis
 
 </details>
 
-Default: V4 Flash
+Default: V4 Flash<br>
 Escalation: MiMo V2.5 Pro / MiniMax M3 if the review comes back thin
 
 ---
@@ -153,7 +153,7 @@ red→green at pre-agreed seams; no horizontal slicing, no tautological or impl-
 
 </details>
 
-Default: V4 Flash
+Default: V4 Flash<br>
 Escalation: max effort only — never a model switch
 
 <details>
@@ -163,7 +163,7 @@ the CONTEXT.md glossary + ADRs; the engine behind grill-with-docs. ADRs only whe
 
 </details>
 
-Default: V4 Flash
+Default: V4 Flash<br>
 Escalation: GLM 5.2 / Luna if shallow
 
 <details>
@@ -173,7 +173,7 @@ Escalation: GLM 5.2 / Luna if shallow
 
 </details>
 
-Default: V4 Flash
+Default: V4 Flash<br>
 Escalation: GLM 5.2 (max effort) / Luna if the fix keeps failing
 
 <details>
@@ -183,7 +183,7 @@ delegated fact-finding against high-trust sources; resolves wayfinder research t
 
 </details>
 
-Default: V4 Flash
+Default: V4 Flash<br>
 Escalation: GLM 5.2 if it comes back thin
 
 <details>
@@ -193,7 +193,7 @@ throwaway artifact to answer "how should it look / behave"; one command to run, 
 
 </details>
 
-Default: V4 Flash / MiMo
+Default: V4 Flash / MiMo<br>
 Escalation: Luna
 
 <details>
@@ -203,7 +203,7 @@ compacts the conversation into a doc for a fresh agent (saved to OS temp, not th
 
 </details>
 
-Default: V4 Flash
+Default: V4 Flash<br>
 Escalation: GLM 5.2 (max effort) if it keeps losing context
 
 <details>
@@ -213,7 +213,7 @@ architecture scan → visual HTML report; also the target when diagnosing-bugs p
 
 </details>
 
-Default: V4 Flash
+Default: V4 Flash<br>
 Escalation: max effort if shallow · GLM 5.2 if still shallow
 
 ## Wayfinder — grilling, scaled up
@@ -224,7 +224,7 @@ For work too big for one session: a **map** (one issue labelled `wayfinder:map`)
 - Blocking uses native tracker dependencies; fog of war lives in "Not yet specified" and graduates as the frontier advances; out-of-scope never graduates
 - One ticket per session (research excepted); refer by name, never a bare id
 
-Default: V4 Flash
+Default: V4 Flash<br>
 Escalation: max effort if the map is wrong · GLM 5.2 / Luna if a grilling ticket stalls
 
 ## Alternate paths
