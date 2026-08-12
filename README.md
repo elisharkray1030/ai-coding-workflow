@@ -50,7 +50,7 @@ I use the **`build`** agent for everything (`opencode run --agent build`). `plan
 ## Stages
 
 <details>
-<summary>grilling: interview for what you want</summary>
+<summary>grilling:</summary>
 
 An interview in rounds over a **design tree** (every decision branches into the decisions hanging off it).
 - Each round asks the whole **frontier** (the decisions whose prerequisites are already settled), numbered, with a recommended answer for each
@@ -63,7 +63,7 @@ An interview in rounds over a **design tree** (every decision branches into the 
 Escalation: GLM 5.2 / Luna if the grill comes back shallow
 
 <details>
-<summary>to-spec: turn the conversation into a spec</summary>
+<summary>to-spec:</summary>
 
 Do NOT re-interview. It just writes.
 1. Sketches the test seams first and checks them with you (existing seams preferred, highest possible, ideally one)
@@ -75,7 +75,7 @@ Do NOT re-interview. It just writes.
 Escalation: GLM 5.2 (max effort) if it misses nuance
 
 <details>
-<summary>to-tickets: slice the spec into small tickets</summary>
+<summary>to-tickets:</summary>
 
 Tracer-bullet tickets: narrow vertical slices through every layer (schema → API → logic → tests → UI), each demoable on its own and sized for one fresh context window. Every ticket declares its blocking edges.
 - Quizzes you on granularity before publishing (too coarse? too fine? merge? split?)
@@ -87,7 +87,7 @@ Tracer-bullet tickets: narrow vertical slices through every layer (schema → AP
 Escalation: none
 
 <details>
-<summary>triage: decide who picks up each ticket</summary>
+<summary>triage:</summary>
 
 Plus a category (`bug` / `enhancement`).
 - `ready-for-agent` = the handoff into implement. Everything else exits or loops back
@@ -100,7 +100,7 @@ Plus a category (`bug` / `enhancement`).
 Escalation: max effort if it keeps misclassifying
 
 <details>
-<summary>implement: build the ticket</summary>
+<summary>implement:</summary>
 
 `/tdd` at pre-agreed seams → typecheck regularly → full suite → `/code-review` → commit.
 - Code review is built in — it runs at the end of implement, no extra step to remember
@@ -112,7 +112,7 @@ Escalation: max effort if it keeps misclassifying
 Escalation: max effort only — no model switch
 
 <details>
-<summary>code-review: check the code against spec + standards</summary>
+<summary>code-review:</summary>
 
 Reviews `fixed-point...HEAD` (your commit/branch/tag, three-dot so it compares against the merge-base) on two parallel axes:
 - **Standards** — repo standards + the Fowler smell baseline
