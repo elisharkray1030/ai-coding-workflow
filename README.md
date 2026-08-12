@@ -278,24 +278,24 @@ Rule of thumb: volume stages (implement, tdd) burn the most tokens, so they stay
 
 **Model Route Quick Reference**
 
-| Task Type | Default | Escalation | Agent | Est. req |
-|-----------|---------|------------|-------|----------|
-| Triage | V4 Flash | Max effort | build | 1-2 |
-| Grilling (incl. grill-with-docs) | V4 Flash | GLM 5.2 / Luna if shallow | build | 3-8 |
-| Planning / spec (new project) | V4 Flash | GLM 5.2 (max effort) | build | 1-3 |
-| Tickets | V4 Flash | — | build | 3-5 |
-| Implementation (simple) | V4 Flash | — | build | 3-8 |
-| Implementation (complex) | V4 Flash | Max effort only — no model switch | build | 5-15 |
-| Debugging | V4 Flash | GLM 5.2 (max effort) / Luna | build | 10-50 |
-| Architecture scan (light) | V4 Flash | Max effort if shallow | build | 1-2 |
-| Architecture scan (deep w/ grill loop) | V4 Flash | Max effort if shallow | build | 3-6 |
-| Prototype | V4 Flash / MiMo | Luna | build | 5-20 |
-| Code review | V4 Flash | MiMo V2.5 Pro / MiniMax M3 | build | 2-4 |
-| Research | V4 Flash | GLM 5.2 if thin | build | 2-5 |
-| Handoff | V4 Flash | GLM 5.2 (max effort) if it loses context | build | 1 |
-| Wayfinder (map) | V4 Flash | Max effort if map is wrong | build | 1-3 |
-| Wayfinder (re-chart) | V4 Flash | Max effort (rare) | build | 1-2 |
-| Wayfinder (tickets) | V4 Flash | — | build | 3-10+ |
+| Task Type | Model | Agent | Est. req |
+|-----------|-------|-------|----------|
+| Triage | V4 Flash<br>max effort | build | 1-2 |
+| Grilling (incl. grill-with-docs) | V4 Flash<br>GLM 5.2 / Luna if shallow | build | 3-8 |
+| Planning / spec (new project) | V4 Flash<br>GLM 5.2 (max effort) | build | 1-3 |
+| Tickets | V4 Flash<br>— | build | 3-5 |
+| Implementation (simple) | V4 Flash<br>— | build | 3-8 |
+| Implementation (complex) | V4 Flash<br>max effort only — no model switch | build | 5-15 |
+| Debugging | V4 Flash<br>GLM 5.2 (max effort) / Luna | build | 10-50 |
+| Architecture scan (light) | V4 Flash<br>max effort if shallow | build | 1-2 |
+| Architecture scan (deep w/ grill loop) | V4 Flash<br>max effort if shallow | build | 3-6 |
+| Prototype | V4 Flash / MiMo<br>Luna | build | 5-20 |
+| Code review | V4 Flash<br>MiMo V2.5 Pro / MiniMax M3 | build | 2-4 |
+| Research | V4 Flash<br>GLM 5.2 if thin | build | 2-5 |
+| Handoff | V4 Flash<br>GLM 5.2 (max effort) if it loses context | build | 1 |
+| Wayfinder (map) | V4 Flash<br>max effort if map is wrong | build | 1-3 |
+| Wayfinder (re-chart) | V4 Flash<br>max effort (rare) | build | 1-2 |
+| Wayfinder (tickets) | V4 Flash<br>— | build | 3-10+ |
 
 </details>
 
