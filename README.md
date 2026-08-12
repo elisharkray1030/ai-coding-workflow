@@ -296,12 +296,40 @@ Max-effort escalation costs the same per token, the only price is latency. Model
 
 This is for me to document my workflow plan so things will change over time~. Models on Go... tools I have access too.. local models??! new models??! subscriptions??!.
 
-0812: answered the 0805 open question. Deep-dive GLM 5.2 vs GPT 5.6 Luna for the thinking stages: GLM keeps grilling/to-spec/diagnosing-bugs — Luna's MRCR ~41% long-context recall cliff and ~84s thinking latency at max effort make it the wrong tool for interview/synthesis/debug loops. Luna takes the prototype escalation instead (7x cheaper input, faster gen, image input for UI prototypes). /implement still strictly Flash. Qwen3.8 Max dropped from escalation lines — $2/$6 with 810 req/mo and no published benchmarks; GLM 5.2 / Luna cover the lanes (kept as last-resort second opinion for stuck debug loops).
+<details>
+<summary>0812: Luna + GLM routing decision</summary>
 
-0811: code review is built into implement (runs automatically at the end of each ticket — no separate step). After a ticket ships, ask if anything else needs fixing/building and loop the whole pipeline from to-spec if yes. Start implement in a fresh session every time: to-spec/to-tickets leave `.scratch/` in the repo, so the new session pulls the spec + tickets from disk with clean context.
+- prototype escalation → Luna (7x cheaper input, faster gen, image input for UI)
+- GLM 5.2 keeps grilling/to-spec/diagnosing-bugs — Luna's MRCR ~41% recall cliff + ~84s max-effort latency = wrong tool for interview/synthesis/debug loops
+- Qwen3.8 Max dropped from escalation lines ($2/$6, 810 req/mo, no published benchmarks) — last-resort second opinion only
+- /implement still strictly Flash
 
-0810: reorganized around the grilling-first pipeline; triage moved from front door to the gate before implement; wayfinder = grilling at scale; added handoff/research, the `.scratch/` convention, and per-repo setup. Mechanics verified against `mattpocock/skills` @ main (Aug 2026).
+</details>
 
-0805: per-stage escalation — thinking stages step up (GLM 5.2, Qwen3.8 Max, MiMo V2.5 Pro, MiniMax M3), /implement stays strictly Flash. Open question: does any stage deserve a model above the current escalation targets (gpt-5.6-luna just landed on Go)? Revisit as the lineup grows.
+<details>
+<summary>0811: review built into implement</summary>
+
+- /code-review auto-runs at the end of implement; standalone stage only for on-demand range reviews
+- after a ticket ships, ask if anything else needs fixing/building → loop from to-spec
+- start /implement in a fresh session (spec + tickets read from `.scratch/<slug>/`)
+
+</details>
+
+<details>
+<summary>0810: grilling-first pipeline</summary>
+
+- triage moved from front door to the gate before implement; wayfinder = grilling at scale
+- added handoff/research, the `.scratch/` convention, and per-repo setup
+- mechanics verified against `mattpocock/skills` @ main (Aug 2026)
+
+</details>
+
+<details>
+<summary>0805: per-stage escalation (open question → answered 0812)</summary>
+
+- thinking stages step up (GLM 5.2, Qwen3.8 Max, MiMo V2.5 Pro, MiniMax M3); /implement stays strictly Flash
+- open question ("does any stage deserve a model above the escalation targets?") — resolved 0812: Luna adopted for /prototype only
+
+</details>
 
 Also in upstream, not yet adopted: to-questionnaire, wait-what, ask-matt, teach, wizard, writing-for-agents.
