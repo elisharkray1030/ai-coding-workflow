@@ -129,13 +129,68 @@ Escalation: MiMo V2.5 Pro / MiniMax M3 if the review comes back thin
 
 ## Supporting skills
 
-- **tdd** — red→green at pre-agreed seams; no horizontal slicing, no tautological or impl-coupled tests
-- **domain-modeling** — the CONTEXT.md glossary + ADRs; the engine behind grill-with-docs. ADRs only when hard-to-reverse + surprising + a real trade-off
-- **diagnosing-bugs** — 6 phases: red-capable loop → reproduce+minimise → 3–5 ranked falsifiable hypotheses (shown to you) → instrument → fix+regression (no correct seam = the finding itself) → cleanup+post-mortem
-- **research** — delegated fact-finding against high-trust sources; resolves wayfinder research tickets
-- **prototype** — throwaway artifact to answer "how should it look / behave"; one command to run, no persistence, no polish
-- **handoff** — compacts the conversation into a doc for a fresh agent (saved to OS temp, not the repo), with a suggested-skills section; redacts secrets
-- **improve-codebase-architecture** — architecture scan → visual HTML report; also the target when diagnosing-bugs phase 6 finds no good seam
+<details>
+<summary>tdd:</summary>
+
+red→green at pre-agreed seams; no horizontal slicing, no tautological or impl-coupled tests.
+
+</details>
+
+Escalation: max effort only — never a model switch
+
+<details>
+<summary>domain-modeling:</summary>
+
+the CONTEXT.md glossary + ADRs; the engine behind grill-with-docs. ADRs only when hard-to-reverse + surprising + a real trade-off.
+
+</details>
+
+Escalation: GLM 5.2 / Luna if shallow
+
+<details>
+<summary>diagnosing-bugs:</summary>
+
+6 phases: red-capable loop → reproduce+minimise → 3–5 ranked falsifiable hypotheses (shown to you) → instrument → fix+regression (no correct seam = the finding itself) → cleanup+post-mortem.
+
+</details>
+
+Escalation: GLM 5.2 (max effort) / Luna if the fix keeps failing
+
+<details>
+<summary>research:</summary>
+
+delegated fact-finding against high-trust sources; resolves wayfinder research tickets.
+
+</details>
+
+Escalation: GLM 5.2 if it comes back thin
+
+<details>
+<summary>prototype:</summary>
+
+throwaway artifact to answer "how should it look / behave"; one command to run, no persistence, no polish. Defaults to V4 Flash / MiMo (cheap throwaway code) — escalate to Luna for speed + image input on UI variants.
+
+</details>
+
+Escalation: Luna
+
+<details>
+<summary>handoff:</summary>
+
+compacts the conversation into a doc for a fresh agent (saved to OS temp, not the repo), with a suggested-skills section; redacts secrets.
+
+</details>
+
+Escalation: GLM 5.2 (max effort) if it keeps losing context
+
+<details>
+<summary>improve-codebase-architecture:</summary>
+
+architecture scan → visual HTML report; also the target when diagnosing-bugs phase 6 finds no good seam.
+
+</details>
+
+Escalation: max effort if shallow · GLM 5.2 if still shallow
 
 ## Wayfinder — grilling, scaled up
 
@@ -210,8 +265,8 @@ Rule of thumb: volume stages (implement, tdd) burn the most tokens, so they stay
 | Architecture scan (deep w/ grill loop) | V4 Flash | Max effort if shallow | build | 3-6 |
 | Prototype | V4 Flash / MiMo | Luna | build | 5-20 |
 | Code review | V4 Flash | MiMo V2.5 Pro / MiniMax M3 | build | 2-4 |
-| Research | V4 Flash | — | build | 2-5 |
-| Handoff | V4 Flash | — | build | 1 |
+| Research | V4 Flash | GLM 5.2 if thin | build | 2-5 |
+| Handoff | V4 Flash | GLM 5.2 (max effort) if it loses context | build | 1 |
 | Wayfinder (map) | V4 Flash | Max effort if map is wrong | build | 1-3 |
 | Wayfinder (re-chart) | V4 Flash | Max effort (rare) | build | 1-2 |
 | Wayfinder (tickets) | V4 Flash | — | build | 3-10+ |
