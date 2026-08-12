@@ -60,7 +60,7 @@ An interview in rounds over a **design tree** (every decision branches into the 
 
 </details>
 
-Escalation: GLM 5.2 / Qwen3.8 Max if the grill comes back shallow
+Escalation: GLM 5.2 / Luna if the grill comes back shallow
 
 <details>
 <summary>to-spec: turn the conversation into a spec</summary>
@@ -72,7 +72,7 @@ Do NOT re-interview. It just writes.
 
 </details>
 
-Escalation: GLM 5.2 / Qwen3.8 Max if it misses nuance
+Escalation: GLM 5.2 (max effort) if it misses nuance
 
 <details>
 <summary>to-tickets: slice the spec into small tickets</summary>
@@ -145,7 +145,7 @@ For work too big for one session: a **map** (one issue labelled `wayfinder:map`)
 - Blocking uses native tracker dependencies; fog of war lives in "Not yet specified" and graduates as the frontier advances; out-of-scope never graduates
 - One ticket per session (research excepted); refer by name, never a bare id
 
-Escalation: max effort if the map is wrong · GLM 5.2 / Qwen3.8 Max if a grilling ticket stalls
+Escalation: max effort if the map is wrong · GLM 5.2 / Luna if a grilling ticket stalls
 
 ## Alternate paths
 
@@ -177,7 +177,7 @@ Rule of thumb: volume stages (implement, tdd) burn the most tokens, so they stay
 | Model | Input $/1M | Output $/1M | Req/5h | Req/mo | Context | Key Strength |
 |---|---|---|---|---|---|---|
 | **Qwen3.7 Max** | $2.50 | $7.50 | 950 | 4,770 | 1M | Highest SWE-bench Pro on Go (60.6%). Best for hard planning. |
-| **Qwen3.8 Max** | $2.00 | $6.00 | — | — | 1M | New Aug 2026. Multimodal. Escalation target for grill/spec/debugging. |
+| **Qwen3.8 Max** | $2.00 | $6.00 | — | — | 1M | New Aug 2026. Multimodal. Not a routing target (0812) — expensive + unproven; last-resort second opinion for stuck debug loops. |
 | **DeepSeek V4 Pro** | $0.435 | $0.87 | 3,450 | 17,150 | 1M | LiveCodeBench 93.5%, Codeforces 3206. Strongest for implementation. |
 | **Kimi K2.6** | $0.95 | $4.00 | 1,150 | 5,750 | 262K | Agent Swarm (300 sub-agents). Agentic multi-file changes. |
 | **Kimi K2.7 Code** | $0.95 | $4.00 | 1,350 | 6,750 | 256K | Coding-focused. More requests than K2.6. Solid mid-tier planner. |
@@ -186,6 +186,7 @@ Rule of thumb: volume stages (implement, tdd) burn the most tokens, so they stay
 | **MiniMax M2.7** | $0.30 | $1.20 | 3,400 | 17,000 | 205K | Strong cost-per-benchmark-point (78% SWE-bench Verified). |
 | **Grok 4.5** | $2.00 | $6.00 | 120 | 600 | 1M | xAI's latest. Fast reasoning, large context. |
 | **GLM-5.2** | $1.40 | $4.40 | 880 | 4,300 | 1M | Zhipu flagship. Strong bilingual coding (CN/EN). |
+| **GPT 5.6 Luna** | $0.20 | $1.20 | 2,050 | 10,250 | 1.05M | Cost champion for agentic code. Weak long-context recall (MRCR 41%) — thinking stages stay GLM. |
 | **GLM-5.1** | $1.40 | $4.40 | 880 | 4,300 | 128K | Solid all-rounder from Zhipu. |
 | **Kimi K3** | $3.00 | $15.00 | 110 | 490 | 128K | Moonshot's coding specialist. High output cost — use sparingly. |
 | **MiMo V2.5 Pro** | $0.435 | $0.87 | 3,250 | 16,300 | 1M | Upgraded MiMo. Same price tier as V4 Pro, lower request cap. |
@@ -199,15 +200,15 @@ Rule of thumb: volume stages (implement, tdd) burn the most tokens, so they stay
 | Task Type | Default | Escalation | Agent | Est. req |
 |-----------|---------|------------|-------|----------|
 | Triage | V4 Flash | Max effort | build | 1-2 |
-| Grilling (incl. grill-with-docs) | V4 Flash | GLM 5.2 / Qwen3.8 Max if shallow | build | 3-8 |
-| Planning / spec (new project) | V4 Flash | GLM 5.2 / Qwen3.8 Max | build | 1-3 |
+| Grilling (incl. grill-with-docs) | V4 Flash | GLM 5.2 / Luna if shallow | build | 3-8 |
+| Planning / spec (new project) | V4 Flash | GLM 5.2 (max effort) | build | 1-3 |
 | Tickets | V4 Flash | — | build | 3-5 |
 | Implementation (simple) | V4 Flash | — | build | 3-8 |
 | Implementation (complex) | V4 Flash | Max effort only — no model switch | build | 5-15 |
-| Debugging | V4 Flash | GLM 5.2 (max effort) / Qwen3.8 Max | build | 10-50 |
+| Debugging | V4 Flash | GLM 5.2 (max effort) / Luna | build | 10-50 |
 | Architecture scan (light) | V4 Flash | Max effort if shallow | build | 1-2 |
 | Architecture scan (deep w/ grill loop) | V4 Flash | Max effort if shallow | build | 3-6 |
-| Prototype | V4 Flash / MiMo | GLM 5.2 | build | 5-20 |
+| Prototype | V4 Flash / MiMo | Luna | build | 5-20 |
 | Code review | V4 Flash | MiMo V2.5 Pro / MiniMax M3 | build | 2-4 |
 | Research | V4 Flash | — | build | 2-5 |
 | Handoff | V4 Flash | — | build | 1 |
@@ -230,7 +231,7 @@ $60/month. A typical feature cycle costs ~**$0.04–0.25** → **240–1,500 fea
 | Balanced (per-stage model pinning, pre-0731) | ~60–120 |
 | Max effort on every call | ~200+ (slower, same token cost) |
 
-Max-effort escalation costs the same per token, the only price is latency. Model escalations (GLM 5.2, Qwen3.8 Max) cost more per token but are rare by design. The $40–50 buffer covers even heavy months (multiple architecture scans, wayfinders, bug fixes).
+Max-effort escalation costs the same per token, the only price is latency. Model escalations (GLM 5.2, Luna) cost more per token but are rare by design. The $40–50 buffer covers even heavy months (multiple architecture scans, wayfinders, bug fixes).
 
 </details>
 
@@ -239,6 +240,8 @@ Max-effort escalation costs the same per token, the only price is latency. Model
 ## Learning & iteration
 
 This is for me to document my workflow plan so things will change over time~. Models on Go... tools I have access too.. local models??! new models??! subscriptions??!.
+
+0812: answered the 0805 open question. Deep-dive GLM 5.2 vs GPT 5.6 Luna for the thinking stages: GLM keeps grilling/to-spec/diagnosing-bugs — Luna's MRCR ~41% long-context recall cliff and ~84s thinking latency at max effort make it the wrong tool for interview/synthesis/debug loops. Luna takes the prototype escalation instead (7x cheaper input, faster gen, image input for UI prototypes). /implement still strictly Flash. Qwen3.8 Max dropped from escalation lines — $2/$6 with 810 req/mo and no published benchmarks; GLM 5.2 / Luna cover the lanes (kept as last-resort second opinion for stuck debug loops).
 
 0811: code review is built into implement (runs automatically at the end of each ticket — no separate step). After a ticket ships, ask if anything else needs fixing/building and loop the whole pipeline from to-spec if yes. Start implement in a fresh session every time: to-spec/to-tickets leave `.scratch/` in the repo, so the new session pulls the spec + tickets from disk with clean context.
 
