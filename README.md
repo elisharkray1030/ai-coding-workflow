@@ -99,7 +99,7 @@ Do NOT re-interview. It just writes.
 </details>
 
 Default: V4 Flash<br>
-Escalation: GLM 5.2 (max effort) if it misses nuance
+Escalation: Luna if it misses nuance
 
 <details>
 <summary>to-tickets:</summary>
@@ -112,7 +112,7 @@ Tracer-bullet tickets: narrow vertical slices through every layer (schema → AP
 </details>
 
 Default: V4 Flash<br>
-Escalation: none
+Escalation: Luna if tickets are wrong-sized
 
 <details>
 <summary>implement:</summary>
@@ -284,8 +284,8 @@ Rule of thumb: volume stages (implement, tdd) burn the most tokens, so they stay
 |-----------|-------|-------|----------|
 | Triage | V4 Flash<br>max effort | build | 1-2 |
 | Grilling (incl. grill-with-docs) | V4 Flash<br>GLM 5.2 / Luna if shallow | build | 3-8 |
-| Planning / spec (new project) | V4 Flash<br>GLM 5.2 (max effort) | build | 1-3 |
-| Tickets | V4 Flash<br>— | build | 3-5 |
+| Planning / spec (new project) | V4 Flash<br>Luna if it misses nuance | build | 1-3 |
+| Tickets | V4 Flash<br>Luna if wrong-sized | build | 3-5 |
 | Implementation (simple) | V4 Flash<br>— | build | 3-8 |
 | Implementation (complex) | V4 Flash<br>max effort only — no model switch | build | 5-15 |
 | Debugging | V4 Flash<br>GLM 5.2 (max effort) / Luna | build | 10-50 |
@@ -366,6 +366,18 @@ This is for me to document my workflow plan so things will change over time~. Mo
 
 - thinking stages step up (GLM 5.2, Qwen3.8 Max, MiMo V2.5 Pro, MiniMax M3); /implement stays strictly Flash
 - open question ("does any stage deserve a model above the escalation targets?") — resolved 0812: Luna adopted for /prototype only
+
+</details>
+
+<details>
+<summary>0820: Luna for bounded thinking stages</summary>
+
+- /to-spec and /to-tickets escalation shifted from GLM 5.2 → Luna
+- Rationale: spec and tickets are bounded single calls (10-30K context), Luna's MRCR cliff irrelevant; 7x cheaper input, 2.4x more requests
+- /grilling stays GLM 5.2 — design tree accumulates across rounds, recall critical, 84s Luna latency kills interview flow
+- /diagnosing-bugs stays GLM 5.2 — debugging needs hypothesis tracking across turns
+- /implement stays Flash — 79% SWE-bench Verified, proven at scale
+- Pattern: GLM for long-context thinking (grilling, debugging), Luna for bounded calls (spec, tickets), Flash for code
 
 </details>
 
