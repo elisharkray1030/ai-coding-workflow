@@ -251,30 +251,32 @@ Escalations are data. Track them per task type, and update the tables when: 3+ s
 <details>
 <summary><strong>Routing & models</strong> — expand</summary>
 
-Rule of thumb: volume stages (implement, tdd) burn the most tokens, so they stay on Flash. Spend escalations on the thinking stages (grilling, spec, debugging, review). A simple feature costs ~$0.04 vs ~$0.42 with the old model-per-stage routing.
+Rule of thumb: volume stages (implement, tdd) burn the most tokens, so they stay on Flash. Spend escalations on the thinking stages (grilling, spec, debugging, review). A simple feature costs ~$0.08 on Flash at peak vs ~$0.50 with per-stage model routing.
 
-**Model Reference** (pricing via OpenCode Go; Req/5h = est. requests per 5-hour window)
+**Model Reference** (pricing via OpenCode Go, Aug 2026; DeepSeek has peak/off-peak — HK work hours are peak)
 
 | Model | Input $/1M | Output $/1M | Req/5h | Req/mo | Context | Key Strength |
 |---|---|---|---|---|---|---|
-| **Qwen3.7 Max** | $2.50 | $7.50 | 950 | 4,770 | 1M | Highest SWE-bench Pro on Go (60.6%). Best for hard planning. |
-| **Qwen3.8 Max** | $2.00 | $6.00 | — | — | 1M | New Aug 2026. Multimodal. Not a routing target (0812) — expensive + unproven; last-resort second opinion for stuck debug loops. |
-| **DeepSeek V4 Pro** | $0.435 | $0.87 | 3,450 | 17,150 | 1M | LiveCodeBench 93.5%, Codeforces 3206. Strongest for implementation. |
+| **MiMo V2.5** | $0.14 | $0.28 | 30,100 | 150,400 | 1M | **Budget king.** Cheapest per-token on Go. |
+| **Hy3** | $0.14 | $0.58 | 4,300 | 21,500 | 128K | Budget model. Flash-like input pricing, higher output cost. |
+| **DeepSeek V4 Flash** | $0.22–0.44 | $0.66–1.32 | 7,600 | 37,800 | 1M | **Default workhorse.** 79% SWE-bench Verified. Peak pricing during HK work hours. |
+| **MiniMax M2.5** | $0.30 | $1.20 | — | — | 1M | New. Same price as M2.7 — use M2.7 or M3 instead. |
+| **MiniMax M2.7** | $0.30 | $1.20 | 3,400 | 17,000 | 1M | Strong cost-per-benchmark-point (78% SWE-bench Verified). |
+| **MiniMax M3** | $0.30 | $1.20 | 3,200 | 16,000 | 1M | MiniMax's latest. Good review escalation value. |
+| **GLM-5.1** | $1.40 | $4.40 | 880 | 4,300 | 128K | Solid all-rounder from Zhipu. |
+| **GLM-5.2** | $1.40 | $4.40 | 880 | 4,300 | 1M | Zhipu flagship. Strong bilingual coding (CN/EN). Best escalation value. |
+| **GLM-5.3** | $1.40 | $4.40 | 220 | 1,080 | 1M | New. Same price as GLM-5.2 but fewer requests — not worth routing to. |
+| **GPT 5.6 Luna** | $0.20–0.40 | $1.20–1.80 | 2,050 | 10,250 | 1.05M | Cost champion for agentic code. Weak long-context recall (MRCR 41%). >272K tokens doubles price. |
 | **Kimi K2.6** | $0.95 | $4.00 | 1,150 | 5,750 | 262K | Agent Swarm (300 sub-agents). Agentic multi-file changes. |
 | **Kimi K2.7 Code** | $0.95 | $4.00 | 1,350 | 6,750 | 256K | Coding-focused. More requests than K2.6. Solid mid-tier planner. |
-| **DeepSeek V4 Flash** | $0.14 | $0.28 | **31,650** | 158,150 | 1M | **Default workhorse.** 79% SWE-bench Verified. Cheap. Fast. |
-| **MiMo V2.5** | $0.14 | $0.28 | 30,100 | 150,400 | 1M | Budget workhorse. Same price as Flash, 1M context. |
-| **MiniMax M2.7** | $0.30 | $1.20 | 3,400 | 17,000 | 205K | Strong cost-per-benchmark-point (78% SWE-bench Verified). |
-| **Grok 4.5** | $2.00 | $6.00 | 120 | 600 | 1M | xAI's latest. Fast reasoning, large context. |
-| **GLM-5.2** | $1.40 | $4.40 | 880 | 4,300 | 1M | Zhipu flagship. Strong bilingual coding (CN/EN). |
-| **GPT 5.6 Luna** | $0.20 | $1.20 | 2,050 | 10,250 | 1.05M | Cost champion for agentic code. Weak long-context recall (MRCR 41%) — thinking stages stay GLM. |
-| **GLM-5.1** | $1.40 | $4.40 | 880 | 4,300 | 128K | Solid all-rounder from Zhipu. |
+| **MiMo V2.5 Pro** | $0.435 | $0.87 | 3,250 | 16,300 | 1M | Upgraded MiMo. Same input price as V4 Pro, better output cost. |
+| **DeepSeek V4 Pro** | $0.66–1.32 | $1.98–3.96 | 1,050 | 5,200 | 1M | LiveCodeBench 93.5%. Strong but expensive — peak pricing in HK hours. |
+| **Qwen3.7 Plus** | $0.40–1.20 | $1.60–4.80 | 4,300 | 21,600 | 1M | Strong mid-tier Qwen. >256K tokens triples price. |
+| **Qwen3.6 Plus** | $0.50–2.00 | $3.00–6.00 | 3,300 | 16,300 | 256K | Earlier Qwen gen. >256K tokens quadruples price. |
+| **Qwen3.7 Max** | $2.50 | $7.50 | 340 | 1,690 | 1M | Highest SWE-bench Pro on Go (60.6%). Best for hard planning. |
+| **Qwen3.8 Max** | $2.00 | $6.00 | 160 | 810 | 1M | Multimodal. Last-resort second opinion only — no published benchmarks. |
+| **Grok 4.5** | $2.00 | $6.00 | 120 | 600 | 1M | xAI's latest. Fast reasoning. Very limited requests. |
 | **Kimi K3** | $3.00 | $15.00 | 110 | 490 | 128K | Moonshot's coding specialist. High output cost — use sparingly. |
-| **MiMo V2.5 Pro** | $0.435 | $0.87 | 3,250 | 16,300 | 1M | Upgraded MiMo. Same price tier as V4 Pro, lower request cap. |
-| **MiniMax M3** | $0.30 | $1.20 | 3,200 | 16,000 | 1M | MiniMax's latest. Improved over M2.7 at same price. |
-| **Qwen3.7 Plus** | $0.40 | $1.60 | 4,300 | 21,600 | 1M | Strong mid-tier Qwen. Good balance of cost and quality. |
-| **Qwen3.6 Plus** | $0.50 | $3.00 | 3,300 | 16,300 | 256K | Earlier Qwen gen at mid-range pricing. Solid reasoning. |
-| **Hy3** | $0.14 | $0.58 | 4,300 | 21,500 | 128K | Budget model. High throughput at Flash-like input pricing. |
 
 **Model Route Quick Reference**
 
@@ -364,6 +366,21 @@ This is for me to document my workflow plan so things will change over time~. Mo
 
 - thinking stages step up (GLM 5.2, Qwen3.8 Max, MiMo V2.5 Pro, MiniMax M3); /implement stays strictly Flash
 - open question ("does any stage deserve a model above the escalation targets?") — resolved 0812: Luna adopted for /prototype only
+
+</details>
+
+<details>
+<summary>0820: OpenCode Go docs refresh</summary>
+
+- DeepSeek V4 Flash/Pro now have peak/off-peak pricing — HK work hours (9am-6pm HKT = 01-10 UTC) are peak, so Flash input is $0.44 (not the old $0.14)
+- Request limits slashed across the board: Flash 31,650→7,600/5h, V4 Pro 3,450→1,050/5h, Qwen3.7 Max 950→340/5h
+- MiMo V2.5 ($0.14/$0.28) is now the real budget king — Flash got more expensive while MiMo stayed the same
+- New models: GLM-5.3 ($15 budget, fewer requests than GLM-5.2 — not worth routing to), MiniMax M2.5 (same as M2.7)
+- Qwen3.8 Max now has data: 160 req/5h, 810/mo — still last-resort only
+- Tiered pricing added: Luna >272K doubles, Qwen3.7 Plus >256K triples, Qwen3.6 Plus >256K quadruples
+- MiniMax M2.7 context updated 205K→1M
+- Model table re-sorted cheapest-first by effective cost
+- Routing strategy unchanged — Flash is still cheapest per-token, escalation targets stay the same
 
 </details>
 
