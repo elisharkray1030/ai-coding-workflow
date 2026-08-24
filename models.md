@@ -2,8 +2,6 @@
 
 Pricing, request limits, and routing for OpenCode Go. Escalations are data — see Routing feedback below for when to update this page. Updated Aug 24 2026 against [official Go docs](https://opencode.ai/docs/go/).
 
-**Also on OpenCode (free tier, not Go):** LongCat 2.0 (Meituan, 1.6T MoE, 48B active) — $0.30/$1.20 per 1M tokens (promo), 1M context. See [LongCat analysis](#longcat-20---free-tier-note) below.
-
 ---
 
 <details>
@@ -83,32 +81,4 @@ Max-effort escalation costs the same per token, the only price is latency. Model
 
 Escalations are data. Track them per task type, and update the tables when: 3+ same-type escalations in 2 weeks, a routed model gets deprecated, or a model at Flash prices beats Flash. Stale routing is worse than no routing.
 
----
 
-## LongCat 2.0 — free tier note
-
-Meituan's LongCat 2.0 (1.6T MoE, 48B active params, MIT license) is available free on OpenCode Zen — not Go-paid. Interesting as a budget comparison point.
-
-| Attribute | Detail |
-|---|---|
-| Params | 1.6T total, ~48B active (33–56B dynamic) |
-| Context | 1M tokens (native, LongCat Sparse Attention) |
-| Pricing | $0.30/$1.20 per 1M (promo), $0.75/$2.95 standard. Cache reads free. |
-| SWE-bench Pro | 59.5 (vendor-reported; vs Qwen3.7 Max 60.6%, GPT-5.5 58.6%) |
-| SWE-bench Multilingual | 77.3 |
-| Terminal-Bench 2.1 | 70.8 |
-| License | MIT |
-| Training | End-to-end on 50K+ domestic Chinese ASICs (no Nvidia) |
-| Weights | Not yet released (announced June 30 2026, weights "coming soon") |
-
-**vs your workflow:** At promo pricing ($0.30/$1.20), LongCat 2.0 matches MiniMax M2.7/M3 on input cost and undercuts GLM-5.2 significantly. SWE-bench Pro 59.5 is close to Qwen3.7 Max (60.6%) at a fraction of the price. 1M context fits full-repo reasoning.
-
-**Caveats:**
-- Weights not released — self-hosting impossible, community can't verify claims
-- Vendor-reported benchmarks (SWE-bench Pro margin over GPT-5.5 is <1 point)
-- Hands-on testing places it closer to Claude Sonnet 4.6 quality, not frontier
-- API routes through Chinese infrastructure — data governance concern for regulated workloads
-- 262K max output cap (vs unlimited on some Go models)
-- Not on Go-paid tier — would be a separate API cost on top of your $10/mo subscription
-
-**Verdict:** Worth benchmarking for cost-tier routing (prototype, research, code review escalation) if you're comfortable with the data routing. Not a Flash replacement — the weights situation and vendor benchmarks make it too uncertain for the default workhorse. Good free-tier option for throwaway prototyping.
