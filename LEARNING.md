@@ -3,6 +3,16 @@
 This is for me to document my workflow plan so things will change over time~. Models on Go... tools I have access too.. local models??! new models??! subscriptions??!.
 
 <details>
+<summary>0826: GLM-5.3 = ox alpha reveal + per-model budget caps</summary>
+
+- ox alpha revealed as GLM-5.3 Flash — same $1.40/$4.40 pricing as GLM-5.2 but $15 budget cap (vs $60 for GLM-5.2) means ~1,080 req/mo vs 4,300. Not worth routing to — GLM-5.2 is strictly better value
+- Per-model usage caps now explicit in docs: most models are $60, but premium/limited models (GLM-5.3, Luna, MiMo V2.5 Pro, V4 Pro, Qwen3.8 Max, Grok 4.5, Kimi K3) are $15. V4 Flash is $30
+- Muse Spark 1.2 Contrib dropped from Go docs — removed from reference table
+- Budget section updated: $10/mo subscription with per-model caps, not a flat $60 pool
+
+</details>
+
+<details>
 <summary>0820: Luna for bounded thinking stages</summary>
 
 - /to-spec and /to-tickets escalation shifted from GLM 5.2 → Luna
