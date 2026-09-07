@@ -28,7 +28,7 @@ graph LR
     ID[Idea] --> GR[ /grilling]
     GR --> SP[ /to-spec]
     SP --> TK[ /to-tickets]
-    GR -->|"fits one window"| IM[ /implement · V4 Flash strictly]
+    GR -->|"fits one window"| IM[ /implement · Muse Spark 1.3 strictly]
     TK -->|"multi-session"| IM
     IM --> Q{Quality gate}
     Q -->|Pass| CR[ /code-review]

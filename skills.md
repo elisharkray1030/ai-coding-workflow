@@ -22,7 +22,7 @@ Only for issues and PRs that arrived from outside — bug reports, feature reque
 
 </details>
 
-Default: V4 Flash<br>
+Default: Muse Spark 1.3<br>
 Escalation: max effort if it keeps misclassifying (rare — inbound lane only)
 
 ---
@@ -40,7 +40,7 @@ An interview in rounds over a **design tree** (every decision branches into the 
 
 </details>
 
-Default: V4 Flash<br>
+Default: Muse Spark 1.3<br>
 Escalation: GLM 5.2 / Luna if the grill comes back shallow
 
 <details>
@@ -53,7 +53,7 @@ Do NOT re-interview. It just writes.
 
 </details>
 
-Default: V4 Flash<br>
+Default: Muse Spark 1.3<br>
 Escalation: Luna if it misses nuance
 
 <details>
@@ -66,7 +66,7 @@ Tracer-bullet tickets: narrow vertical slices through every layer (schema → AP
 
 </details>
 
-Default: V4 Flash<br>
+Default: Muse Spark 1.3<br>
 Escalation: Luna if tickets are wrong-sized
 
 <details>
@@ -79,7 +79,7 @@ Escalation: Luna if tickets are wrong-sized
 
 </details>
 
-Default: V4 Flash<br>
+Default: Muse Spark 1.3<br>
 Escalation: max effort only — no model switch
 
 <details>
@@ -94,7 +94,7 @@ The two reports stay separate and are never reranked. A change can pass one axis
 
 </details>
 
-Default: V4 Flash<br>
+Default: Muse Spark 1.3<br>
 Escalation: MiMo V2.5 Pro / MiniMax M3 if the review comes back thin
 
 ---
@@ -108,7 +108,7 @@ red→green at pre-agreed seams; no horizontal slicing, no tautological or impl-
 
 </details>
 
-Default: V4 Flash<br>
+Default: Muse Spark 1.3<br>
 Escalation: max effort only — never a model switch
 
 <details>
@@ -118,7 +118,7 @@ the CONTEXT.md glossary + ADRs; the engine behind grill-with-docs. ADRs only whe
 
 </details>
 
-Default: V4 Flash<br>
+Default: Muse Spark 1.3<br>
 Escalation: GLM 5.2 / Luna if shallow
 
 <details>
@@ -128,7 +128,7 @@ Escalation: GLM 5.2 / Luna if shallow
 
 </details>
 
-Default: V4 Flash<br>
+Default: Muse Spark 1.3<br>
 Escalation: GLM 5.2 (max effort) / Luna if the fix keeps failing
 
 <details>
@@ -138,17 +138,17 @@ delegated fact-finding against high-trust sources; resolves wayfinder research t
 
 </details>
 
-Default: V4 Flash<br>
+Default: Muse Spark 1.3<br>
 Escalation: GLM 5.2 if it comes back thin
 
 <details>
 <summary>prototype:</summary>
 
-throwaway artifact to answer "how should it look / behave"; one command to run, no persistence, no polish. Defaults to V4 Flash / MiMo (cheap throwaway code) — escalate to Luna for speed + image input on UI variants.
+throwaway artifact to answer "how should it look / behave"; one command to run, no persistence, no polish. Defaults to Muse Spark 1.3 / MiMo (cheap throwaway code) — escalate to Luna for speed + image input on UI variants.
 
 </details>
 
-Default: V4 Flash / MiMo<br>
+Default: Muse Spark 1.3 / MiMo<br>
 Escalation: Luna
 
 <details>
@@ -158,7 +158,7 @@ compacts the conversation into a doc for a fresh agent (saved to OS temp, not th
 
 </details>
 
-Default: V4 Flash<br>
+Default: Muse Spark 1.3<br>
 Escalation: GLM 5.2 (max effort) if it keeps losing context
 
 <details>
@@ -168,7 +168,7 @@ architecture scan → visual HTML report; also the target when diagnosing-bugs p
 
 </details>
 
-Default: V4 Flash<br>
+Default: Muse Spark 1.3<br>
 Escalation: max effort if shallow · GLM 5.2 if still shallow
 
 <details>
@@ -184,5 +184,5 @@ grilling, scaled up — for work too big to hold in one session. Charts a **map*
 
 </details>
 
-Default: V4 Flash<br>
+Default: Muse Spark 1.3<br>
 Escalation: max effort if the map is wrong · GLM 5.2 / Luna if a grilling ticket stalls
