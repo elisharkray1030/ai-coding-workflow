@@ -3,6 +3,18 @@
 This is for me to document my workflow plan so things will change over time~. Models on Go... tools I have access too.. local models??! new models??! subscriptions??!.
 
 <details>
+<summary>0907: Muse Spark 1.3 replaces DeepSeek V4 Flash</summary>
+
+- DeepSeek V4 Flash limits slashed — replaced with Muse Spark 1.3 as the primary workhorse
+- Muse Spark 1.3: 1M context, $1.25/$4.25 per 1M tokens, multimodal (text, image, video), ~20% fewer tool calls than 1.2
+- Escalation targets unchanged: GLM 5.2 for grilling/debugging, Luna for spec/tickets/prototype, MiMo V2.5 Pro / MiniMax M3 for code review
+- Models.md gutted — full pricing table removed (too volatile), now tracks routing decisions and budget patterns only. Current pricing always at opencode.ai/docs/go
+- All routing lines updated: V4 Flash → Muse Spark 1.3
+
+</details>
+
+
+<details>
 <summary>0826: GLM-5.3 = ox alpha reveal + per-model budget caps</summary>
 
 - ox alpha revealed as GLM-5.3 Flash — same $1.40/$4.40 pricing as GLM-5.2 but $15 budget cap (vs $60 for GLM-5.2) means ~1,080 req/mo vs 4,300. Not worth routing to — GLM-5.2 is strictly better value
